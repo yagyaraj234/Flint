@@ -97,6 +97,11 @@ def _number(value: object) -> float | None:
     return None
 
 
+def _token_count(value: object) -> int | None:
+    number = _number(value)
+    return int(number) if number is not None and number >= 0 else None
+
+
 def _parse_span(value: object, index: int) -> Span:
     item = _as_dict(value)
     parsed_type = _span_type(item)
@@ -111,12 +116,21 @@ def _parse_span(value: object, index: int) -> Span:
     start_ms = _number(_first(item, ("start_ms", "start_time", "start")))
     duration_ms = _number(_first(item, ("duration_ms", "duration")))
 
-    tokens_in = estimate_tokens(input_text) if parsed_type == "llm" else None
-    tokens_out = estimate_tokens(output_text) if parsed_type == "llm" else None
-    token_source = "estimated" if parsed_type == "llm" else None
+    usage = _as_dict(item.get("usage") or item.get("usage_metadata"))
+    measured_in = _token_count(_first(usage, ("input_tokens", "prompt_tokens")))
+    measured_out = _token_count(_first(usage, ("output_tokens", "completion_tokens")))
+    if measured_in is None:
+        measured_in = _token_count(item.get("input_tokens"))
+    if measured_out is None:
+        measured_out = _token_count(item.get("output_tokens"))
+    has_measured_usage = measured_in is not None or measured_out is not None
+    tokens_in = (measured_in if measured_in is not None else estimate_tokens(input_text)) if parsed_type == "llm" else None
+    tokens_out = (measured_out if measured_out is not None else estimate_tokens(output_text)) if parsed_type == "llm" else None
+    token_source = ("measured" if has_measured_usage else "estimated") if parsed_type == "llm" else None
     consumed = {
         *_IDENTITY_KEYS, *_PROMPT_KEYS, *_OUTPUT_KEYS, "id", "span_id", "parent_id",
         "parent_span_id", "start_ms", "start_time", "start", "duration_ms", "duration",
+        "usage", "usage_metadata", "input_tokens", "output_tokens",
     }
     meta = {key: item_value for key, item_value in item.items() if key not in consumed}
 

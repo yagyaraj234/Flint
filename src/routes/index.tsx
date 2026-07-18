@@ -3,6 +3,7 @@ import {
 	ArrowRight,
 	Copy,
 	DollarSign,
+	PlugZap,
 	Repeat2,
 	ShieldCheck,
 } from "lucide-react";
@@ -82,6 +83,7 @@ function LandingPage() {
 					<Logo inverse />
 					<nav className="landing-nav__links" aria-label="Main navigation">
 						<a href="#what-flint-catches">What Flint catches</a>
+						<a href="#integrations">Integrations</a>
 						<a href="#live-reports">Live reports</a>
 						<a href="/ai-agent-trace-analyzer">Trace analyzer</a>
 					</nav>
@@ -134,6 +136,48 @@ function LandingPage() {
 					<p className="product-shot__caption">
 						Live report UI · illustrative redacted demo trace
 					</p>
+				</section>
+
+				<section className="integration-pulse section-shell" id="integrations">
+					<div className="integration-pulse__copy">
+						<p className="eyebrow">Integrations / LangSmith</p>
+						<h2>Put your trace telemetry to work.</h2>
+						<p>
+							Connect LangSmith once and Flint keeps reviewing completed traces
+							for secrets, brittle runs, and waste—without storing a raw
+							credential.
+						</p>
+						<a className="button" href="/app/integrations/langsmith/new">
+							Connect LangSmith <ArrowRight aria-hidden="true" />
+						</a>
+					</div>
+					<article className="integration-pulse__card">
+						<div className="integration-pulse__card-top">
+							<span className="integration-pulse__mark">
+								<PlugZap aria-hidden="true" />
+							</span>
+							<span>Available now</span>
+						</div>
+						<h3>LangSmith</h3>
+						<p>
+							Continuous redacted scans for the traces already in your
+							workspace.
+						</p>
+						<dl>
+							<div>
+								<dt>First pass</dt>
+								<dd>24 hours / 50 traces</dd>
+							</div>
+							<div>
+								<dt>Then</dt>
+								<dd>Hourly scan cadence</dd>
+							</div>
+							<div>
+								<dt>Credentials</dt>
+								<dd>Encrypted server-side</dd>
+							</div>
+						</dl>
+					</article>
 				</section>
 
 				<section

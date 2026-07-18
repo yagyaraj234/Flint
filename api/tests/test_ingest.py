@@ -77,6 +77,21 @@ def test_ingest_rejects_bad_source(fake_db: FakeSupabase) -> None:
     assert resp.status_code == 422
 
 
+def test_ingest_rejects_forged_langsmith_provenance(fake_db: FakeSupabase) -> None:
+    resp = client.post(
+        "/ingest",
+        json={
+            "source": "langsmith",
+            "trace": _leaked_key_trace(),
+            "user_id": "11111111-1111-1111-1111-111111111111",
+            "langsmith_connection_id": "22222222-2222-2222-2222-222222222222",
+            "external_trace_id": "trace-1",
+        },
+    )
+    assert resp.status_code == 403
+    assert not fake_db.rows
+
+
 def test_ingest_rejects_unparseable_trace(fake_db: FakeSupabase) -> None:
     resp = client.post("/ingest", json={"source": "upload", "trace": 42})
     assert resp.status_code == 422

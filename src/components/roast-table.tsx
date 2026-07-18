@@ -47,7 +47,7 @@ export function RoastTable({
 							</td>
 							<td className="px-5 py-4">
 								<span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs capitalize text-stone-600">
-									{roast.source}
+									{sourceLabel(roast.source)}
 								</span>
 							</td>
 							<td className="px-5 py-4 font-mono font-semibold">
@@ -126,4 +126,8 @@ function formatDate(value: string) {
 		: new Intl.DateTimeFormat("en", {
 				dateStyle: "medium",
 			}).format(date);
+}
+
+function sourceLabel(source: RoastListItem["source"]): string {
+	return source === "langsmith" ? "LangSmith" : source;
 }

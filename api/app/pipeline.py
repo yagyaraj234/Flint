@@ -42,13 +42,20 @@ def _parse(req: IngestRequest) -> NormalizedTrace:
 
 
 def _insert_row(row: dict[str, Any]) -> None:
-    """Keep ingest live until the detailed-report migration has been applied."""
+    """Keep ingest live until optional-report and integration migrations land."""
     try:
         get_supabase().table("roasts").insert(row).execute()
     except Exception as exc:
-        if "detailed_report" not in str(exc):
+        optional_columns = (
+            "detailed_report",
+            "langsmith_connection_id",
+            "external_trace_id",
+        )
+        if not any(column in str(exc) for column in optional_columns):
             raise
-        legacy_row = {key: value for key, value in row.items() if key != "detailed_report"}
+        legacy_row = {
+            key: value for key, value in row.items() if key not in optional_columns
+        }
         get_supabase().table("roasts").insert(legacy_row).execute()
 
 
@@ -57,6 +64,8 @@ def run_pipeline(
     user_id: str | None = None,
     batch_id: str | None = None,
     title_override: str | None = None,
+    langsmith_connection_id: str | None = None,
+    external_trace_id: str | None = None,
 ) -> str:
     trace = _parse(req)
     redacted, hits = redact_trace(trace)
@@ -86,6 +95,8 @@ def run_pipeline(
         "status": "done",
         "user_id": user_id,
         "batch_id": batch_id,
+        "langsmith_connection_id": langsmith_connection_id,
+        "external_trace_id": external_trace_id,
     }
     _insert_row(row)
     return slug
