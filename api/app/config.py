@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     langsmith_initial_lookback_hours: int = 24
     langsmith_sync_overlap_seconds: int = 120
     langsmith_sync_lease_seconds: int = 900
+    dodo_api_key: str = ""
+    dodo_environment: str = "test_mode"
+    dodo_webhook_secret: str = ""
+    dodo_pro_product_id: str = ""
+    free_tier_monthly_scans: int = 5
 
     model_config = {"env_file": ".env"}
 

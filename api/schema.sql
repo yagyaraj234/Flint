@@ -106,3 +106,19 @@ create index if not exists roasts_status_created_idx on public.roasts (status, c
 alter table public.roasts enable row level security;
 -- No policies: server-side service-role client bypasses RLS.
 alter table public.langsmith_connections enable row level security;
+
+create table if not exists public.subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) unique,
+  plan text not null default 'free' check (plan in ('free', 'pro')),
+  status text not null default 'none'
+    check (status in ('none', 'active', 'on_hold', 'cancelled', 'failed')),
+  dodo_customer_id text,
+  dodo_subscription_id text unique,
+  current_period_end timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.subscriptions enable row level security;
+-- no policies: only the FastAPI service role reaches this table
