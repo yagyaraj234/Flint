@@ -53,3 +53,4 @@ class CostReport(BaseModel):
     token_source: Literal["measured", "estimated", "mixed"]
     monthly_projection_usd: float  # waste_usd * RUNS_PER_DAY * 30
     projection_assumption: str  # printed on the card, e.g. "at 1,000 runs/day"
+    unpriced_models: list[str] = []
