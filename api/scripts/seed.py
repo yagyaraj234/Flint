@@ -24,12 +24,15 @@ def main() -> None:
         return
     for path in paths:
         trace = json.loads(path.read_text())
-        source = "bfcl" if "bfcl" in path.stem else "upload"
-        resp = httpx.post(
-            f"{base}/ingest",
-            json={"source": source, "title": path.stem, "trace": trace},
-            timeout=30,
-        )
+        is_bfcl = path.stem.startswith("bfcl-")
+        payload = {
+            "source": "bfcl" if is_bfcl else "upload",
+            "title": path.stem,
+            "trace": trace,
+        }
+        if is_bfcl:
+            payload["format"] = "generic"
+        resp = httpx.post(f"{base}/ingest", json=payload, timeout=30)
         resp.raise_for_status()
         print(f"{path.relative_to(REPO_ROOT)} -> /r/{resp.json()['slug']}")
 
