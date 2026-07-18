@@ -12,7 +12,7 @@ function Roasts() {
 	const query = useAppSearch();
 
 	return (
-		<main className="mx-auto max-w-7xl p-5 lg:p-8">
+		<main className="app-page">
 			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
 				Dashboard / Roasts
 			</p>

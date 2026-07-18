@@ -21,8 +21,8 @@ import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as ApiIngestRouteImport } from './routes/api.ingest'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppNewRouteImport } from './routes/app.new'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppRoastsRouteImport } from './routes/app.roasts'
-import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as RSlugRouteImport } from './routes/r/$slug'
 import { Route as AppRoastsIndexRouteImport } from './routes/app.roasts.index'
 import { Route as AppRoastsBatchRouteImport } from './routes/app.roasts.$batch'
@@ -87,14 +87,14 @@ const AppNewRoute = AppNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRoastsRoute = AppRoastsRouteImport.update({
   id: '/roasts',
   path: '/roasts',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const RSlugRoute = RSlugRouteImport.update({
@@ -125,8 +125,8 @@ export interface FileRoutesByFullPath {
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
-  '/app/settings': typeof AppSettingsRoute
   '/r/$slug': typeof RSlugRoute
   '/app/': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
@@ -143,7 +143,7 @@ export interface FileRoutesByTo {
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/app/profile': typeof AppProfileRoute
   '/r/$slug': typeof RSlugRoute
   '/app': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
@@ -162,8 +162,8 @@ export interface FileRoutesById {
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
-  '/app/settings': typeof AppSettingsRoute
   '/r/$slug': typeof RSlugRoute
   '/app/': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
@@ -183,8 +183,8 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
+    | '/app/profile'
     | '/app/roasts'
-    | '/app/settings'
     | '/r/$slug'
     | '/app/'
     | '/app/roasts/$batch'
@@ -201,7 +201,7 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
-    | '/app/settings'
+    | '/app/profile'
     | '/r/$slug'
     | '/app'
     | '/app/roasts/$batch'
@@ -219,8 +219,8 @@ export interface FileRouteTypes {
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
+    | '/app/profile'
     | '/app/roasts'
-    | '/app/settings'
     | '/r/$slug'
     | '/app/'
     | '/app/roasts/$batch'
@@ -327,18 +327,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/roasts': {
       id: '/app/roasts'
       path: '/roasts'
       fullPath: '/app/roasts'
       preLoaderRoute: typeof AppRoastsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/settings': {
-      id: '/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/r/$slug': {
@@ -381,15 +381,15 @@ const AppRoastsRouteWithChildren = AppRoastsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppNewRoute: typeof AppNewRoute
+  AppProfileRoute: typeof AppProfileRoute
   AppRoastsRoute: typeof AppRoastsRouteWithChildren
-  AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppNewRoute: AppNewRoute,
+  AppProfileRoute: AppProfileRoute,
   AppRoastsRoute: AppRoastsRouteWithChildren,
-  AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
