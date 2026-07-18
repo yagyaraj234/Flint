@@ -1,0 +1,240 @@
+{
+  "trace": {
+    "id": "trace-detailed-support-20260718",
+    "workflow_name": "Detailed customer support escalation",
+    "metadata": {
+      "environment": "staging",
+      "release": "support-agent@2026.07.18",
+      "run_id": "run_support_01J2DETAILED",
+      "pricing_model": "gpt-5.6-luna",
+      "pricing_note": "The analyzer resolves this model against api/app/analyze/pricing.py.",
+      "projection_assumption": "at 1,000 runs/day"
+    },
+    "spans": [
+      {
+        "span_id": "span-guardrail-input",
+        "parent_id": null,
+        "start_ms": 0,
+        "duration_ms": 8,
+        "span_data": {
+          "type": "guardrail",
+          "name": "request-schema-check",
+          "input": {
+            "ticket_id": "SUP-1842",
+            "channel": "email",
+            "priority": "high"
+          },
+          "output": {
+            "passed": true
+          }
+        }
+      },
+      {
+        "span_id": "span-router",
+        "parent_id": "span-guardrail-input",
+        "start_ms": 12,
+        "duration_ms": 620,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You route support tickets to the smallest capable workflow. Return JSON with queue, priority, and required tools."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-1842 from maya.chen@example.com: My annual plan renewed twice and I need a refund before Friday."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"queue\":\"billing\",\"priority\":\"high\",\"required_tools\":[\"lookup_subscription\",\"create_refund_case\"]}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1400,
+            "output_tokens": 180
+          }
+        }
+      },
+      {
+        "span_id": "span-handoff-billing",
+        "parent_id": "span-router",
+        "start_ms": 640,
+        "duration_ms": 18,
+        "span_data": {
+          "type": "handoff",
+          "name": "billing-specialist",
+          "input": {
+            "ticket_id": "SUP-1842",
+            "priority": "high"
+          },
+          "output": {
+            "accepted": true
+          }
+        }
+      },
+      {
+        "span_id": "span-subscription-lookup",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 670,
+        "duration_ms": 210,
+        "span_data": {
+          "type": "function",
+          "name": "lookup_subscription",
+          "arguments": {
+            "customer_id": "cus_demo_maya_chen",
+            "ticket_id": "SUP-1842"
+          },
+          "result": {
+            "plan": "annual-pro",
+            "renewals_in_last_24h": 2,
+            "eligible_for_refund": true
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-policy-first",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 900,
+        "duration_ms": 780,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are the billing policy agent. Check the supplied policy and account facts. Return a concise refund decision with evidence."
+            },
+            {
+              "role": "user",
+              "content": "Policy: duplicate annual renewals within 24 hours are refundable. Account: annual-pro, two renewals in 24 hours, ticket SUP-1842."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "Approve a refund for the duplicate renewal. Evidence: two annual-pro renewals occurred within the policy window."
+            }
+          ],
+          "usage": {
+            "input_tokens": 2400,
+            "output_tokens": 340
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-policy-retry",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 1690,
+        "duration_ms": 770,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are the billing policy agent. Check the supplied policy and account facts. Return a concise refund decision with evidence."
+            },
+            {
+              "role": "user",
+              "content": "Policy: duplicate annual renewals within 24 hours are refundable. Account: annual-pro, two renewals in 24 hours, ticket SUP-1842."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "Approve a refund for the duplicate renewal. Evidence: two annual-pro renewals occurred within the policy window."
+            }
+          ],
+          "usage": {
+            "input_tokens": 2400,
+            "output_tokens": 340
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-case-attempt-1",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 2480,
+        "duration_ms": 380,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-1842",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-case-attempt-2",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 2870,
+        "duration_ms": 370,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-1842",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-case-attempt-3",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 3250,
+        "duration_ms": 365,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-1842",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true
+          }
+        }
+      },
+      {
+        "span_id": "span-refund-case-attempt-4",
+        "parent_id": "span-handoff-billing",
+        "start_ms": 3625,
+        "duration_ms": 362,
+        "meta": {
+          "status": "error",
+          "error_code": "BILLING_GATEWAY_TIMEOUT"
+        },
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-1842",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true
+          }
+        }
+      }
+    ]
+  }
+}
