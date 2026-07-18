@@ -10,6 +10,7 @@ client = TestClient(app)
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
 CLEAN_TRACE = json.loads((FIXTURES / "clean.json").read_text())
 HEADERS = {"Authorization": "Bearer good-token-user-1"}
+OTHER_HEADERS = {"Authorization": "Bearer good-token-user-3"}
 
 
 def test_owner_roasts_require_auth_and_filter_by_owner_and_batch(fake_db: FakeSupabase) -> None:
@@ -33,3 +34,84 @@ def test_owner_roasts_require_auth_and_filter_by_owner_and_batch(fake_db: FakeSu
     filtered = client.get(f"/me/roasts?batch_id={first['batch_id']}", headers=HEADERS)
     assert {row["batch_id"] for row in filtered.json()} == {first["batch_id"]}
     assert len(filtered.json()) == 2
+
+
+def test_owner_can_manage_visibility_and_shares(fake_db: FakeSupabase) -> None:
+    slug = client.post(
+        "/ingest/batch",
+        json={"title": "owned", "traces": [CLEAN_TRACE]},
+        headers=HEADERS,
+    ).json()["results"][0]["slug"]
+    sharing_url = f"/me/roasts/{slug}/sharing"
+
+    assert client.get(sharing_url).status_code == 401
+    assert client.get(sharing_url, headers=OTHER_HEADERS).status_code == 404
+    assert client.get(sharing_url, headers=HEADERS).json() == {
+        "visibility": "public",
+        "shares": [],
+    }
+
+    private = client.put(
+        f"/me/roasts/{slug}/visibility",
+        json={"visibility": "private"},
+        headers=HEADERS,
+    )
+    assert private.status_code == 200
+    assert private.json() == {"visibility": "private", "shares": []}
+
+    share_url = f"/me/roasts/{slug}/shares"
+    for _ in range(2):
+        response = client.post(
+            share_url,
+            json={"email": " Team@Example.COM "},
+            headers=HEADERS,
+        )
+        assert response.status_code == 200
+    assert response.json() == {
+        "visibility": "private",
+        "shares": [
+            {
+                "email": "team@example.com",
+                "created_at": "2026-07-18T10:00:00Z",
+            }
+        ],
+    }
+    assert len(fake_db.report_shares) == 1
+    assert client.post(share_url, json={"email": "invalid"}, headers=HEADERS).status_code == 422
+
+    deleted = client.delete(
+        f"{share_url}/TEAM%40EXAMPLE.COM",
+        headers=HEADERS,
+    )
+    assert deleted.status_code == 200
+    assert deleted.json() == {"visibility": "private", "shares": []}
+
+    public = client.put(
+        f"/me/roasts/{slug}/visibility",
+        json={"visibility": "public"},
+        headers=HEADERS,
+    )
+    assert public.status_code == 200
+    assert client.get(sharing_url, headers=HEADERS).json()["visibility"] == "public"
+
+
+def test_share_email_containing_slash_is_revocable(fake_db: FakeSupabase) -> None:
+    slug = client.post(
+        "/ingest/batch",
+        json={"title": "owned", "traces": [CLEAN_TRACE]},
+        headers=HEADERS,
+    ).json()["results"][0]["slug"]
+    share_url = f"/me/roasts/{slug}/shares"
+    tricky_email = "customer/department=shipping@example.com"
+
+    created = client.post(share_url, json={"email": tricky_email}, headers=HEADERS)
+    assert created.status_code == 200
+    assert created.json()["shares"] == [
+        {"email": tricky_email, "created_at": "2026-07-18T10:00:00Z"}
+    ]
+
+    from urllib.parse import quote
+
+    deleted = client.delete(f"{share_url}/{quote(tricky_email, safe='')}", headers=HEADERS)
+    assert deleted.status_code == 200
+    assert deleted.json()["shares"] == []
