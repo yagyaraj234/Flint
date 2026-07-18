@@ -105,10 +105,10 @@ def main() -> None:
     want = int(counts[0]) if counts else 5
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for row in fetch_rows(want):
+    for index, row in enumerate(fetch_rows(want)):
         trace = to_trace(row)
         model_slug = re.sub(r"[^A-Za-z0-9.-]+", "-", row["model_name"])
-        out = OUT_DIR / f"swe-{row['instance_id']}-{model_slug}.json"
+        out = OUT_DIR / f"swe-{row['instance_id']}-{model_slug}-{index}.json"
         out.write_text(json.dumps(trace, indent=2))
         line = f"{out.name}  steps={len(trace['steps'])} exit={trace['meta']['exit_status']!r}"
         if post:
