@@ -43,7 +43,12 @@ export async function getPublicRoastData(
 
 	try {
 		const { getRoast } = await import("#/lib/api");
-		return toPublicRoast(await getRoast(slug, accessToken ?? undefined));
+		try {
+			return toPublicRoast(await getRoast(slug, accessToken ?? undefined));
+		} catch {
+			if (!accessToken) return null;
+			return toPublicRoast(await getRoast(slug));
+		}
 	} catch {
 		return null;
 	}

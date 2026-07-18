@@ -157,13 +157,16 @@ export function ShareDialog({
 									</button>
 								))}
 							</fieldset>
-							{sharing.visibility === "public" && (
-								<div className="share-dialog__link">
-									<input aria-label="Report URL" readOnly value={reportUrl} />
-									<button disabled={pending} type="button" onClick={copyLink}>
-										{copied ? "Copied" : "Copy"}
-									</button>
-								</div>
+							<div className="share-dialog__link">
+								<input aria-label="Report URL" readOnly value={reportUrl} />
+								<button disabled={pending} type="button" onClick={copyLink}>
+									{copied ? "Copied" : "Copy"}
+								</button>
+							</div>
+							{sharing.visibility === "private" && (
+								<p className="share-dialog__empty">
+									Recipients must sign in with an email listed below.
+								</p>
 							)}
 						</section>
 

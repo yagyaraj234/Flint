@@ -131,7 +131,10 @@ describe("ShareDialog", () => {
 			shares: [],
 		});
 		fireEvent.click(view.getByRole("button", { name: "Private" }));
-		await waitFor(() => expect(view.queryByLabelText("Report URL")).toBeNull());
+		await view.findByText(
+			"Recipients must sign in with an email listed below.",
+		);
+		expect(view.getByLabelText("Report URL")).toBeTruthy();
 	});
 
 	test("shows validation errors inline", async () => {
