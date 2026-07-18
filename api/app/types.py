@@ -31,6 +31,11 @@ class NormalizedTrace(BaseModel):
     spans: list[Span]
 
 
+class RedactionHit(BaseModel):
+    rule: str
+    span_id: str
+
+
 class Finding(BaseModel):
     rule: str
     category: Category
