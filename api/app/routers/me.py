@@ -114,7 +114,7 @@ def create_roast_share(
     return _sharing_info(roast)
 
 
-@router.delete("/roasts/{slug}/shares/{email}", response_model=SharingInfo)
+@router.delete("/roasts/{slug}/shares/{email:path}", response_model=SharingInfo)
 def delete_roast_share(
     slug: str,
     email: str,

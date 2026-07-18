@@ -93,3 +93,25 @@ def test_owner_can_manage_visibility_and_shares(fake_db: FakeSupabase) -> None:
     )
     assert public.status_code == 200
     assert client.get(sharing_url, headers=HEADERS).json()["visibility"] == "public"
+
+
+def test_share_email_containing_slash_is_revocable(fake_db: FakeSupabase) -> None:
+    slug = client.post(
+        "/ingest/batch",
+        json={"title": "owned", "traces": [CLEAN_TRACE]},
+        headers=HEADERS,
+    ).json()["results"][0]["slug"]
+    share_url = f"/me/roasts/{slug}/shares"
+    tricky_email = "customer/department=shipping@example.com"
+
+    created = client.post(share_url, json={"email": tricky_email}, headers=HEADERS)
+    assert created.status_code == 200
+    assert created.json()["shares"] == [
+        {"email": tricky_email, "created_at": "2026-07-18T10:00:00Z"}
+    ]
+
+    from urllib.parse import quote
+
+    deleted = client.delete(f"{share_url}/{quote(tricky_email, safe='')}", headers=HEADERS)
+    assert deleted.status_code == 200
+    assert deleted.json()["shares"] == []
