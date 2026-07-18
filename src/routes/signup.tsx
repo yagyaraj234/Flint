@@ -9,7 +9,12 @@ import {
 } from "#/lib/auth";
 import { signUp } from "#/lib/auth.functions";
 
-export const Route = createFileRoute("/signup")({ component: SignupPage });
+export const Route = createFileRoute("/signup")({
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
+	component: SignupPage,
+});
 
 function SignupPage() {
 	const [email, setEmail] = useState("");

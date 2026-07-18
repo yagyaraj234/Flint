@@ -1,12 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ArrowRight, Copy, DollarSign, Gauge, ShieldCheck } from "lucide-react";
 
 import { DotGlyph, DotMatrix } from "../components/DotMatrix";
 import { Logo } from "../components/Logo";
 import { RoastProductShot } from "../components/RoastProductShot";
+import { getCurrentUser } from "../lib/auth.functions";
 import { getRecentPublicRoasts } from "../lib/public-roasts.functions";
 
 export const Route = createFileRoute("/")({
+	beforeLoad: async () => {
+		if (await getCurrentUser()) throw redirect({ to: "/app" });
+	},
 	loader: () => getRecentPublicRoasts(),
 	head: () => ({
 		meta: [
@@ -62,7 +66,7 @@ function LandingPage() {
 					<nav className="landing-nav__links" aria-label="Main navigation">
 						<a href="#how-it-works">How it works</a>
 						<a href="#live-roasts">Live roasts</a>
-						<a href="#pricing">Pricing</a>
+						<a href="/ai-agent-trace-analyzer">Trace analyzer</a>
 					</nav>
 					<div className="landing-nav__actions">
 						<a className="nav-login" href="/login">

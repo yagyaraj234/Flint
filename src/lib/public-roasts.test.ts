@@ -1,10 +1,12 @@
 import { describe, expect, test } from "vitest";
 
 import {
+	fallbackRoastLine,
 	formatShareText,
 	publicRoastMeta,
 	toPublicRoast,
 	toPublicRoastSummaries,
+	toPublicRoastSummary,
 } from "./public-roasts";
 
 describe("public roasts", () => {
@@ -95,5 +97,71 @@ describe("public roasts", () => {
 			title: "This agent put its secrets on speakerphone. · Roast0",
 			description: "12/100 · Charcoal · $0.50 waste found. Leaky agent",
 		});
+	});
+
+	test("rejects malformed public data and applies safe defaults", () => {
+		expect(toPublicRoastSummary(null)).toBeNull();
+		expect(toPublicRoastSummary({ slug: "missing-fields" })).toBeNull();
+		expect(toPublicRoastSummaries({})).toEqual([]);
+		expect(toPublicRoast({ slug: "missing-fields" })).toBeNull();
+
+		const roast = toPublicRoast({
+			slug: "safe-defaults",
+			title: "Defaults",
+			source: "upload",
+			score: 101,
+			tier: "Rare",
+			findings: [
+				null,
+				{ category: "unknown", severity: 2, message: "discard" },
+				{ category: "cost", severity: 2.5, title: "Prompt bloat" },
+			],
+			cost: null,
+			normalized: {
+				spans: [null, { name: "fallback span" }],
+			},
+		});
+
+		expect(roast).toMatchObject({
+			score: 100,
+			roastLine: null,
+			createdAt: null,
+			findings: [
+				{
+					rule: "Prompt bloat",
+					category: "cost",
+					severity: 2,
+					message: "Prompt bloat",
+					estWasteUsd: null,
+				},
+			],
+			cost: {
+				totalTokensIn: 0,
+				totalTokensOut: 0,
+				totalUsd: 0,
+				wasteUsd: 0,
+				tokenSource: "estimated",
+				monthlyProjectionUsd: 0,
+				projectionAssumption: "projection unavailable",
+			},
+			timeline: [
+				{
+					id: "span-2",
+					type: "other",
+					name: "fallback span",
+					model: null,
+					tokensIn: null,
+					tokensOut: null,
+					durationMs: null,
+				},
+			],
+		});
+	});
+
+	test("supplies a verdict for every tier", () => {
+		expect(fallbackRoastLine("Rare")).toContain("Clean execution");
+		expect(fallbackRoastLine("Medium")).toContain("fingerprints");
+		expect(fallbackRoastLine("Well Done")).toContain("budget");
+		expect(fallbackRoastLine("Charcoal")).toContain("receipts");
 	});
 });

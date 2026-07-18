@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiAgentTraceAnalyzerRouteImport } from './routes/ai-agent-trace-analyzer'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as ApiIngestRouteImport } from './routes/api.ingest'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -27,6 +30,11 @@ import { Route as AppRoastsBatchRouteImport } from './routes/app.roasts.$batch'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiAgentTraceAnalyzerRoute = AiAgentTraceAnalyzerRouteImport.update({
+  id: '/ai-agent-trace-analyzer',
+  path: '/ai-agent-trace-analyzer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -44,9 +52,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
@@ -97,10 +115,13 @@ const AppRoastsBatchRoute = AppRoastsBatchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-agent-trace-analyzer': typeof AiAgentTraceAnalyzerRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
@@ -113,9 +134,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-agent-trace-analyzer': typeof AiAgentTraceAnalyzerRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
@@ -128,10 +152,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-agent-trace-analyzer': typeof AiAgentTraceAnalyzerRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/update-password': typeof UpdatePasswordRoute
   '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
@@ -146,10 +173,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-agent-trace-analyzer'
     | '/app'
     | '/login'
     | '/reset-password'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
@@ -162,9 +192,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-agent-trace-analyzer'
     | '/login'
     | '/reset-password'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
@@ -176,10 +209,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ai-agent-trace-analyzer'
     | '/app'
     | '/login'
     | '/reset-password'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/update-password'
     | '/api/ingest'
     | '/app/new'
@@ -193,10 +229,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiAgentTraceAnalyzerRoute: typeof AiAgentTraceAnalyzerRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   ApiIngestRoute: typeof ApiIngestRoute
   RSlugRoute: typeof RSlugRoute
@@ -209,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-agent-trace-analyzer': {
+      id: '/ai-agent-trace-analyzer'
+      path: '/ai-agent-trace-analyzer'
+      fullPath: '/ai-agent-trace-analyzer'
+      preLoaderRoute: typeof AiAgentTraceAnalyzerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -232,11 +278,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/update-password': {
@@ -337,10 +397,13 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiAgentTraceAnalyzerRoute: AiAgentTraceAnalyzerRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   ApiIngestRoute: ApiIngestRoute,
   RSlugRoute: RSlugRoute,

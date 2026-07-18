@@ -6,6 +6,9 @@ import { getEmailError } from "#/lib/auth";
 import { requestPasswordReset } from "#/lib/auth.functions";
 
 export const Route = createFileRoute("/reset-password")({
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
 	component: ResetPasswordPage,
 });
 

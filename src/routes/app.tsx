@@ -15,6 +15,9 @@ const loadDashboard = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const Route = createFileRoute("/app")({
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
 	beforeLoad: async () => {
 		const user = await getCurrentUser();
 		if (!user) throw redirect({ to: "/login" });

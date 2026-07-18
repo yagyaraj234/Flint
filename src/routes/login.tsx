@@ -5,7 +5,12 @@ import { AuthShell } from "#/components/auth-shell";
 import { getEmailError, getPasswordError } from "#/lib/auth";
 import { logIn } from "#/lib/auth.functions";
 
-export const Route = createFileRoute("/login")({ component: LoginPage });
+export const Route = createFileRoute("/login")({
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
+	component: LoginPage,
+});
 
 function LoginPage() {
 	const [email, setEmail] = useState("");

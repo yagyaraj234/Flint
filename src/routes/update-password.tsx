@@ -9,6 +9,9 @@ import {
 } from "#/lib/auth.functions";
 
 export const Route = createFileRoute("/update-password")({
+	head: () => ({
+		meta: [{ name: "robots", content: "noindex, nofollow" }],
+	}),
 	validateSearch: (search: Record<string, unknown>) => ({
 		code: typeof search.code === "string" ? search.code : undefined,
 	}),

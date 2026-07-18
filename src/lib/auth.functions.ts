@@ -65,7 +65,13 @@ export const updatePassword = createServerFn({ method: "POST" })
 	});
 
 export const getCurrentUser = createServerFn({ method: "GET" }).handler(
-	getAuthenticatedUser,
+	async () => {
+		try {
+			return await getAuthenticatedUser();
+		} catch {
+			return null;
+		}
+	},
 );
 
 export const logOut = createServerFn({ method: "POST" }).handler(async () => {

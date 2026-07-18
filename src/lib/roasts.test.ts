@@ -50,4 +50,36 @@ describe("dashboard roast helpers", () => {
 			),
 		).toHaveLength(1);
 	});
+
+	test("handles an empty week and an empty search", () => {
+		expect(
+			summarizeRoasts(
+				[
+					{
+						createdAt: "invalid",
+						score: 10,
+						status: "processing",
+						secretCount: 0,
+						wasteUsd: 0,
+					},
+				],
+				1,
+				Date.parse("2026-07-18T12:00:00.000Z"),
+			),
+		).toMatchObject({ worstScoreThisWeek: null });
+
+		const rows = [
+			{
+				id: "1",
+				slug: "one",
+				title: "One",
+				source: "upload" as const,
+				score: 100,
+				tier: "Rare",
+				status: "done" as const,
+				createdAt: "2026-07-18T12:00:00.000Z",
+			},
+		];
+		expect(filterRoasts(rows, " ")).toBe(rows);
+	});
 });

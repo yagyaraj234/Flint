@@ -116,25 +116,11 @@ input {
 	font-weight: 600;
 }
 
-.button--ember {
-	background: var(--ember);
-	color: #fff;
-}
-
 .button--ghost {
 	border-color: rgba(250, 247, 242, 0.24);
 	color: var(--cream);
 }
 
-.landing-shell {
-	min-height: 100svh;
-	background:
-		radial-gradient(circle at 64% 70%, rgba(255, 77, 0, 0.26), transparent 30%),
-		linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 66%, #391106 100%);
-	color: var(--cream);
-}
-
-.landing-nav,
 .public-topbar {
 	display: flex;
 	width: min(1100px, calc(100% - 48px));
@@ -143,36 +129,6 @@ input {
 	justify-content: space-between;
 	gap: 24px;
 	margin: 0 auto;
-}
-
-.landing-nav__links,
-.landing-nav__actions {
-	display: flex;
-	align-items: center;
-	gap: 24px;
-}
-
-.landing-nav__links {
-	color: rgba(250, 247, 242, 0.7);
-	font-size: 14px;
-}
-
-.landing-nav__actions {
-	gap: 10px;
-}
-
-.landing-stage {
-	display: grid;
-	min-height: calc(100svh - 80px);
-	place-items: center;
-	overflow: hidden;
-}
-
-.landing-stage__dots {
-	width: min(780px, 90vw);
-	height: auto;
-	filter: drop-shadow(0 24px 70px rgba(255, 77, 0, 0.32));
-	transform: scale(1.7);
 }
 
 .auth-page {
@@ -444,45 +400,11 @@ input {
 	background: var(--surface);
 }
 
-.public-shell {
-	min-height: 100svh;
-	background: var(--app-bg);
-}
-
 .public-topbar {
 	min-height: 72px;
 }
 
-.public-card-frame {
-	width: min(880px, calc(100% - 48px));
-	min-height: 560px;
-	margin: 34px auto 80px;
-	border: 1px dashed var(--border);
-	border-radius: 18px;
-	background: var(--surface);
-	box-shadow: 0 22px 60px rgba(28, 25, 23, 0.08);
-}
-
 @media (max-width: 760px) {
-	.landing-nav {
-		width: min(100% - 32px, 1100px);
-	}
-
-	.landing-nav__links,
-	.landing-nav .button--ghost {
-		display: none;
-	}
-
-	.landing-nav .button {
-		min-height: 38px;
-		padding: 0 14px;
-	}
-
-	.landing-stage__dots {
-		width: 110vw;
-		transform: scale(1.35);
-	}
-
 	.auth-page {
 		display: block;
 		padding: 88px 16px 24px;
@@ -576,11 +498,5 @@ input {
 
 	.public-topbar {
 		width: calc(100% - 32px);
-	}
-
-	.public-card-frame {
-		width: calc(100% - 32px);
-		min-height: 500px;
-		margin-top: 20px;
 	}
 }
