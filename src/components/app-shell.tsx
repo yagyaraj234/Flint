@@ -1,13 +1,15 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import {
 	CirclePlus,
+	CreditCard,
 	LayoutDashboard,
 	PlugZap,
 	ScanSearch,
 	UserRound,
 } from "lucide-react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
+import { getBillingStatus } from "#/lib/billing.functions";
 import { Logo } from "./brand";
 
 const SearchContext = createContext("");
@@ -17,6 +19,7 @@ const navItems = [
 	{ icon: CirclePlus, label: "New scan", to: "/app/new" },
 	{ icon: ScanSearch, label: "Scans", to: "/app/roasts" },
 	{ icon: PlugZap, label: "Integrations", to: "/app/integrations" },
+	{ icon: CreditCard, label: "Billing", to: "/app/billing" },
 	{ icon: UserRound, label: "Profile", to: "/app/profile" },
 ] as const;
 
@@ -32,7 +35,13 @@ export function AppShell({
 	user: { email: string };
 }) {
 	const [search, setSearch] = useState("");
+	const [plan, setPlan] = useState<"free" | "pro" | null>(null);
 	const initial = user.email.slice(0, 1).toUpperCase() || "R";
+	useEffect(() => {
+		void getBillingStatus()
+			.then((billing) => setPlan(billing.plan))
+			.catch(() => undefined);
+	}, []);
 
 	return (
 		<SearchContext.Provider value={search}>
@@ -47,7 +56,7 @@ export function AppShell({
 								activeOptions={{ exact: item.to === "/app" }}
 								activeProps={{ className: "is-active" }}
 								key={item.to}
-								to={item.to}
+								to={item.to as never}
 							>
 								<span className="app-sidebar__nav-label">
 									<item.icon aria-hidden="true" size={16} strokeWidth={1.8} />
@@ -55,6 +64,11 @@ export function AppShell({
 								</span>
 								{item.to === "/app/roasts" ? (
 									<span className="nav-count">{totalRoasts}</span>
+								) : null}
+								{item.to === "/app/billing" && plan ? (
+									<span className="status-pill">
+										{plan === "pro" ? "Pro" : "Free"}
+									</span>
 								) : null}
 							</Link>
 						))}
