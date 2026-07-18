@@ -1057,6 +1057,19 @@ textarea {
 	color: #c84b16;
 }
 
+.public-page .mono-label,
+.public-page .source-chip,
+.public-page .tier-chip,
+.public-page .card-section-heading > span,
+.public-page .finding-tags span,
+.public-page .cost-grid span,
+.public-page .public-cost > p,
+.public-page .public-timeline summary small,
+.public-page .public-timeline li small,
+.public-page .public-timeline li code {
+	font-size: 11px;
+}
+
 .public-page .source-chip,
 .public-page .share-actions button {
 	border-color: #dfd1c3;
@@ -1116,31 +1129,55 @@ textarea {
 }
 
 .public-page .public-findings li strong {
-	font-size: 15px;
+	font-size: 17px;
 	font-weight: 600;
 }
 
 .public-page .public-findings li p {
-	color: #5f5148;
-	font-size: 14px;
-	line-height: 1.65;
+	color: #493d36;
+	font-size: 16px;
+	line-height: 1.6;
 }
 
 .public-page .public-findings li small {
-	color: #78695f;
-	font-size: 9px;
+	color: #68584e;
+	font-size: 12px;
 }
 
 .public-page .card-section-heading h2 {
 	font-size: 30px;
 }
 
-.public-page .cost-grid span {
-	font-size: 9px;
+.public-page .public-fixes ol {
+	grid-template-columns: 1fr;
+}
+
+.public-page .public-fixes li {
+	padding: 24px;
+}
+
+.public-page .public-fixes strong {
+	font-size: 17px;
+}
+
+.public-page .public-fixes p {
+	color: #493d36;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.public-page .public-fixes small {
+	color: #68584e;
+	font-size: 12px;
+	line-height: 1.55;
 }
 
 .public-page .cost-grid strong {
-	font-size: clamp(24px, 2.8vw, 34px);
+	font-size: clamp(28px, 2.8vw, 36px);
+}
+
+.public-page .public-timeline li strong {
+	font-size: 16px;
 }
 
 .public-fixes {
@@ -1883,7 +1920,7 @@ button:focus-visible,
 	}
 
 	.public-page .public-findings li p {
-		font-size: 13px;
+		font-size: 15px;
 	}
 
 	.public-fixes ol {
