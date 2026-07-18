@@ -1,0 +1,91 @@
+{
+  "id": "6f1c2e6a-9d1b-4f0e-8a3a-2b7c1d4e5f60",
+  "slug": "aB3xK9qZ",
+  "title": "leaky agent run",
+  "source": "live",
+  "raw_trace": {
+    "note": "post-redaction copy of the submitted trace; shape varies by source"
+  },
+  "normalized": {
+    "trace_id": "trace_leaky_001",
+    "workflow": "weather-agent",
+    "spans": [
+      {
+        "id": "span-1",
+        "parent_id": null,
+        "type": "llm",
+        "name": "gpt-4o-mini",
+        "model": "gpt-4o-mini",
+        "start_ms": 0,
+        "duration_ms": 812,
+        "tokens_in": 512,
+        "tokens_out": 64,
+        "token_source": "measured",
+        "input": "You are a weather assistant. Get the forecast for Berlin.",
+        "output": "I'll call the weather tool.",
+        "meta": {}
+      },
+      {
+        "id": "span-2",
+        "parent_id": "span-1",
+        "type": "tool",
+        "name": "get_weather",
+        "model": null,
+        "start_ms": 830,
+        "duration_ms": 145,
+        "tokens_in": null,
+        "tokens_out": null,
+        "token_source": null,
+        "input": "{\"city\":\"Berlin\",\"api_key\":\"«REDACTED:openai-key»\"}",
+        "output": "{\"temp_c\":21,\"condition\":\"cloudy\"}",
+        "meta": {}
+      },
+      {
+        "id": "span-3",
+        "parent_id": "span-1",
+        "type": "llm",
+        "name": "gpt-4o-mini",
+        "model": "gpt-4o-mini",
+        "start_ms": 990,
+        "duration_ms": 640,
+        "tokens_in": 610,
+        "tokens_out": 42,
+        "token_source": "measured",
+        "input": "Tool result: 21C cloudy. Summarize for the user.",
+        "output": "It's 21°C and cloudy in Berlin.",
+        "meta": {}
+      }
+    ]
+  },
+  "findings": [
+    {
+      "rule": "leaked-secret",
+      "category": "security",
+      "severity": 3,
+      "span_ids": ["span-2"],
+      "message": "An OpenAI API key was passed through a tool argument. It was redacted before storage.",
+      "est_waste_usd": null
+    },
+    {
+      "rule": "duplicate-llm-call",
+      "category": "cost",
+      "severity": 2,
+      "span_ids": ["span-1", "span-3"],
+      "message": "2 LLM calls sent an identical prompt. One of them bought nothing.",
+      "est_waste_usd": 0.0021
+    }
+  ],
+  "cost": {
+    "total_tokens_in": 1122,
+    "total_tokens_out": 106,
+    "total_usd": 0.0043,
+    "waste_usd": 0.0021,
+    "token_source": "measured",
+    "monthly_projection_usd": 63.0,
+    "projection_assumption": "at 1,000 runs/day"
+  },
+  "score": 28,
+  "tier": "Charcoal",
+  "roast_line": "Your agent tips its API key to every tool it meets. Generous. Broke, but generous.",
+  "created_at": "2026-07-18T09:42:11.000Z"
+}
