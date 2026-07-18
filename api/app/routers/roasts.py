@@ -13,6 +13,7 @@ def recent_roasts() -> list[RecentRoast]:
         get_supabase()
         .table("roasts")
         .select("slug,title,score,tier,status,created_at")
+        .neq("source", "langsmith")
         .order("created_at", desc=True)
         .limit(10)
         .execute()
@@ -24,5 +25,7 @@ def recent_roasts() -> list[RecentRoast]:
 def get_roast(slug: str) -> RoastRow:
     result = get_supabase().table("roasts").select("*").eq("slug", slug).limit(1).execute()
     if not result.data:
+        raise HTTPException(status_code=404, detail="roast not found")
+    if result.data[0].get("source") == "langsmith":
         raise HTTPException(status_code=404, detail="roast not found")
     return RoastRow(**result.data[0])

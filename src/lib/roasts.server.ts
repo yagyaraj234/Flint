@@ -15,6 +15,7 @@ const SOURCES = new Set<RoastSource>([
 	"bfcl",
 	"gaia",
 	"live",
+	"langsmith",
 ]);
 
 function record(value: unknown): Record<string, unknown> {

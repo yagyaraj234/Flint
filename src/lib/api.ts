@@ -4,7 +4,13 @@
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
-export type Source = "synthetic" | "upload" | "bfcl" | "gaia" | "live";
+export type Source =
+	| "synthetic"
+	| "upload"
+	| "bfcl"
+	| "gaia"
+	| "live"
+	| "langsmith";
 export type TraceFormat = "openai-agents" | "generic";
 export type SpanType = "llm" | "tool" | "handoff" | "guardrail" | "other";
 export type TokenSource = "measured" | "estimated";

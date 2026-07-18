@@ -24,6 +24,7 @@ function query(response: QueryResponse) {
 	for (const method of [
 		"select",
 		"eq",
+		"neq",
 		"order",
 		"limit",
 		"maybeSingle",

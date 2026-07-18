@@ -1,4 +1,10 @@
-export type RoastSource = "synthetic" | "upload" | "bfcl" | "gaia" | "live";
+export type RoastSource =
+	| "synthetic"
+	| "upload"
+	| "bfcl"
+	| "gaia"
+	| "live"
+	| "langsmith";
 
 export type RoastStatus = "processing" | "done" | "failed";
 

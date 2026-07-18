@@ -41,3 +41,11 @@ def test_recent_lists_newest_first_capped_at_10(fake_db: FakeSupabase) -> None:
     body = resp.json()
     assert len(body) == 10
     assert set(body[0]) == {"slug", "title", "score", "tier", "status", "created_at"}
+
+
+def test_public_roast_endpoints_hide_langsmith_rows(fake_db: FakeSupabase) -> None:
+    slug = _ingest("private LangSmith trace")
+    fake_db.rows[0]["source"] = "langsmith"
+
+    assert client.get("/roasts/recent").json() == []
+    assert client.get(f"/roasts/{slug}").status_code == 404

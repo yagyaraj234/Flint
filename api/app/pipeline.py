@@ -58,6 +58,8 @@ def run_pipeline(req: IngestRequest) -> str:
         "status": "done",
         "user_id": req.user_id,
         "batch_id": req.batch_id,
+        "langsmith_connection_id": req.langsmith_connection_id,
+        "external_trace_id": req.external_trace_id,
     }
     get_supabase().table("roasts").insert(row).execute()
     return slug

@@ -31,3 +31,10 @@ pytest
 ```
 
 Tests use a fake in-memory Supabase (tests/conftest.py), no network needed.
+
+## LangSmith hourly sync
+
+The Cloudflare Worker triggers `POST /internal/jobs/langsmith-hourly` at the top
+of every hour. Configure `API_URL` and `CRON_SECRET` as Worker secrets, and use
+the same `CRON_SECRET` in the FastAPI environment. The API also requires
+`INTERNAL_API_TOKEN` and `LANGSMITH_CREDENTIAL_KEY`; see `.env.example`.

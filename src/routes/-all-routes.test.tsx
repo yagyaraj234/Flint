@@ -467,6 +467,10 @@ describe("landing and public card routes", () => {
 		});
 		queryResponses.push({ data: [] });
 		await (landingModule.Route.options.loader as () => Promise<unknown>)();
+		expect(queries.at(-1)?.calls).toContainEqual([
+			"neq",
+			["source", "langsmith"],
+		]);
 		const landingHead = (
 			landingModule.Route.options.head as () => RouteOptions
 		)();
@@ -502,6 +506,12 @@ describe("landing and public card routes", () => {
 		const { unmount } = render(component(landingModule.Route));
 		expect(screen.getByText("Database live")).toBeTruthy();
 		expect(screen.getByText("Public report ready to review.")).toBeTruthy();
+		expect(screen.getByText("Put your trace telemetry to work.")).toBeTruthy();
+		expect(
+			screen
+				.getByRole("link", { name: "Connect LangSmith" })
+				.getAttribute("href"),
+		).toBe("/app/integrations/langsmith/new");
 		expect(
 			screen
 				.getByRole("link", { name: "See a live report" })
@@ -535,6 +545,10 @@ describe("landing and public card routes", () => {
 			params: { slug: string };
 		}) => Promise<unknown>;
 		expect(await loader({ params: { slug: "hot-one" } })).toEqual(roast);
+		expect(queries.at(-1)?.calls).toContainEqual([
+			"neq",
+			["source", "langsmith"],
+		]);
 		queryResponses.push({ data: null });
 		await expect(loader({ params: { slug: "missing" } })).rejects.toEqual({
 			isNotFound: true,

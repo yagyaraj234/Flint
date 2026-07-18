@@ -10,6 +10,7 @@ class FakeQuery:
     def __init__(self, store: list[dict[str, Any]]):
         self.store = store
         self._filters: list[tuple[str, Any]] = []
+        self._not_filters: list[tuple[str, Any]] = []
         self._limit: int | None = None
         self._update: dict[str, Any] | None = None
 
@@ -28,6 +29,10 @@ class FakeQuery:
         self._filters.append((col, val))
         return self
 
+    def neq(self, col: str, val: Any) -> "FakeQuery":
+        self._not_filters.append((col, val))
+        return self
+
     def order(self, *_: Any, **__: Any) -> "FakeQuery":
         return self
 
@@ -36,7 +41,12 @@ class FakeQuery:
         return self
 
     def execute(self) -> Any:
-        rows = [r for r in self.store if all(r.get(c) == v for c, v in self._filters)]
+        rows = [
+            r
+            for r in self.store
+            if all(r.get(c) == v for c, v in self._filters)
+            and all(r.get(c) != v for c, v in self._not_filters)
+        ]
         if self._update is not None:
             for row in rows:
                 row.update(self._update)

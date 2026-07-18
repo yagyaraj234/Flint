@@ -33,6 +33,7 @@ async function publicRoasts(): Promise<
 			.from("roasts")
 			.select("slug,created_at")
 			.eq("status", "done")
+			.neq("source", "langsmith")
 			.order("created_at", { ascending: false });
 		if (error || !Array.isArray(data)) return [];
 

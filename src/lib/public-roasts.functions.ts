@@ -15,6 +15,7 @@ export const getRecentPublicRoasts = createServerFn({ method: "GET" }).handler(
 				.from("roasts")
 				.select("slug,title,score,tier,roast_line,created_at")
 				.eq("status", "done")
+				.neq("source", "langsmith")
 				.order("created_at", { ascending: false })
 				.limit(8);
 
@@ -43,6 +44,7 @@ export const getPublicRoast = createServerFn({ method: "GET" })
 				)
 				.eq("slug", slug)
 				.eq("status", "done")
+				.neq("source", "langsmith")
 				.limit(1)
 				.maybeSingle();
 
