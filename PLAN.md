@@ -28,28 +28,57 @@ browser ──► TanStack Start server (bun, :3000) ──► FastAPI (uvicorn,
 - The Start app server-fetches from FastAPI (`API_URL=http://localhost:8000`). Server-side fetch keeps SSR working for the stage 6 OG tags.
 - The browser talks only to the Start server. One data path, no CORS debugging, no RLS debugging.
 
-## API contract (frozen — all three tracks build against this)
+## API contract (v3 — authenticated ownership, 2026-07-18; frozen again after this change)
 
 Field names are snake_case everywhere, including JSON payloads. The UI adapts; nobody converts casing mid-pipeline.
 
+Identity: FastAPI derives `user_id` from a Supabase access token sent as
+`Authorization: Bearer <token>`, validated server-side (`supabase.auth.get_user`).
+`user_id` is never accepted in a request body. The Start server reads the session
+from its Supabase auth cookies and forwards the access token — the browser still
+only talks to the Start server, and the data path stays browser → Start server →
+FastAPI → Supabase.
+
 ```
 POST /ingest
+  auth: optional (anonymous ingest stays open for scripts/live capture)
   body: { "source": "synthetic"|"upload"|"bfcl"|"gaia"|"live",
-          "title": string?, "format": "openai-agents"|"generic"?, "trace": <any JSON>,
-          "user_id": uuid?, "batch_id": uuid? }
+          "title": string?, "format": "openai-agents"|"generic"?, "trace": <any JSON> }
   200:  { "slug": string }
   422:  unparseable trace / bad source
 
-GET /roasts/{slug}
-  200: the full roasts row (see data model; includes status/error/user_id/batch_id) | 404
+POST /ingest/batch
+  auth: required (401 without a valid token)
+  body: { "source"?, "title"?, "format"?, "traces": [<any JSON>, ...] }   // 1–25
+  200:  { "batch_id": uuid,
+          "results": [ { "slug", "status": "done"|"failed", "error": string? } ] }
+  Synchronous per trace. A trace that fails to parse stores a 'failed' row
+  (score 0, tier "Unknown", empty findings/cost) so the batch view can show it.
+  With >1 trace, titles get a " N" suffix.
 
-GET /roasts/recent
-  200: [ { "slug", "title", "score", "tier", "status", "created_at" } ]  // 10 newest
+GET /roasts/{slug}                       // public card read, 'done' rows only
+  200: { slug, title, source, score, tier, roast_line, status, findings, cost,
+         normalized, created_at } | 404
+  Never includes raw_trace, user_id, batch_id, error, or id. normalized is
+  post-redaction and powers the public span timeline.
 
-status is 'processing'|'done'|'failed' (schema v2, from the UI team). The current
-pipeline is synchronous, so backend-written rows are always 'done'; the other
-states exist for UI-side batch/async flows.
+GET /roasts/recent                       // public live wall
+  200: [ { "slug", "title", "score", "tier", "roast_line", "status", "created_at" } ]
+       // 10 newest 'done' rows
+
+GET /me/roasts?batch_id=<uuid?>          // owner reads (dashboard, batch view)
+  auth: required
+  200: newest first: [ { id, slug, title, source, score, tier, findings, cost,
+        status, error, created_at, batch_id } ]
+
+status is 'processing'|'done'|'failed' (schema v2). Backend writes are
+synchronous, so rows land as 'done' or 'failed'; 'processing' is reserved.
 ```
+
+CostReport gains `unpriced_models: list[str]` — models seen on llm spans with no
+`PRICING` entry. When non-empty the dollar figures are lower bounds and the card
+must label them as such; the silent $0 fallback for unknown models is a bug, not
+a feature.
 
 A checked-in example response lives at `fixtures/contract/roast-row.json` (created in stage 1). The UI track builds the card against that file and swaps in the live fetch later. If the contract must change, it changes here first and gets announced out loud.
 
@@ -174,6 +203,7 @@ class CostReport(BaseModel):
     token_source: Literal['measured', 'estimated', 'mixed']
     monthly_projection_usd: float  # waste_usd * RUNS_PER_DAY * 30
     projection_assumption: str     # printed on the card, e.g. "at 1,000 runs/day"
+    unpriced_models: list[str] = []  # llm span models missing from PRICING (v3)
 ```
 
 `token_source` matters. Traces captured from the SDK carry real usage numbers, so they're `measured`. Uploaded or public traces without usage get a chars/4 estimate and are labeled `estimated` on the card. The card always says which one it's showing. Judges with API experience will ask where the dollar figure came from, and "measured from span usage, estimated and labeled when usage is absent" is the answer that survives the question.
