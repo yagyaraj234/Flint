@@ -363,6 +363,7 @@ textarea {
 .product-shot {
 	position: relative;
 	z-index: 4;
+	width: min(1280px, calc(100% - 48px));
 	margin-top: -148px;
 }
 
@@ -1275,6 +1276,80 @@ textarea {
 	.feature-card .mono-label,
 	.feature-card__top > svg:last-child {
 		color: rgba(28, 25, 23, 0.42);
+	}
+
+	.browser-frame {
+		border-color: rgba(28, 25, 23, 0.14);
+		background: #fffdf9;
+		box-shadow:
+			0 35px 80px rgba(28, 25, 23, 0.16),
+			0 0 0 1px rgba(28, 25, 23, 0.03);
+	}
+
+	.browser-frame__bar {
+		border-bottom-color: rgba(28, 25, 23, 0.1);
+		background: #f0ece7;
+	}
+
+	.browser-frame__bar > span {
+		background: #b8afa8;
+	}
+
+	.browser-frame__bar div {
+		border-color: rgba(28, 25, 23, 0.09);
+		background: rgba(255, 255, 255, 0.72);
+		color: rgba(28, 25, 23, 0.4);
+	}
+
+	.public-card--preview {
+		background:
+			linear-gradient(rgba(28, 25, 23, 0.04) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(28, 25, 23, 0.04) 1px, transparent 1px),
+			#fffdf9;
+		background-size: 42px 42px;
+		color: var(--text);
+	}
+
+	.public-card--preview .public-card__topline,
+	.public-card--preview .public-findings {
+		border-color: rgba(28, 25, 23, 0.12);
+	}
+
+	.public-card--preview .source-chip {
+		border-color: rgba(28, 25, 23, 0.16);
+		color: rgba(28, 25, 23, 0.55);
+	}
+
+	.public-card--preview .score-ring {
+		background: conic-gradient(
+			var(--ember) 0deg,
+			var(--ember-soft) var(--score-angle),
+			rgba(28, 25, 23, 0.1) var(--score-angle),
+			rgba(28, 25, 23, 0.1) 360deg
+		);
+		box-shadow: 0 0 45px rgba(255, 77, 0, 0.1);
+	}
+
+	.public-card--preview .score-ring::before {
+		border-color: rgba(28, 25, 23, 0.08);
+		background: #fffdf9;
+	}
+
+	.public-card--preview .score-ring span {
+		color: rgba(28, 25, 23, 0.42);
+	}
+
+	.public-card--preview .public-verdict__copy h2 {
+		color: #4a2115;
+	}
+
+	.public-card--preview .public-findings li {
+		border-color: rgba(28, 25, 23, 0.12);
+		background: rgba(255, 255, 255, 0.6);
+	}
+
+	.public-card--preview .public-findings li p {
+		color: rgba(28, 25, 23, 0.58);
 	}
 
 	.feature-grid {
