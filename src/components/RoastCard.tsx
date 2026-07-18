@@ -13,6 +13,90 @@ function tierSlug(tier: string): string {
 	return tier.toLowerCase().replaceAll(" ", "-");
 }
 
+function fixForFinding(finding: PublicRoast["findings"][number]): {
+	title: string;
+	detail: string;
+	impact: string;
+} {
+	const waste =
+		finding.estWasteUsd !== null && finding.estWasteUsd > 0
+			? `${money(finding.estWasteUsd)} estimated waste per run.`
+			: "Measure again after the change to confirm savings.";
+	switch (finding.rule) {
+		case "leaked-secret":
+			return {
+				title: "Rotate exposed credentials",
+				detail:
+					"Revoke this key, move it into server-only secrets, and pass a scoped reference instead of the value.",
+				impact: "Security: blocks account takeover and surprise API bills.",
+			};
+		case "pii-in-prompt":
+			return {
+				title: "Remove PII before the prompt",
+				detail:
+					"Redact customer identifiers at ingestion and pass a stable internal reference to the model instead.",
+				impact:
+					"Security: reduces privacy exposure in model logs and downstream tools.",
+			};
+		case "insecure-url":
+			return {
+				title: "Require secure tool URLs",
+				detail:
+					"Replace the HTTP endpoint with HTTPS and reject insecure destinations before the tool call starts.",
+				impact:
+					"Security: protects trace data while it moves between services.",
+			};
+		case "duplicate-llm-call":
+			return {
+				title: "Deduplicate the LLM request",
+				detail:
+					"Cache identical in-flight requests and reuse the first response before calling the model again.",
+				impact: `Cost: ${waste}`,
+			};
+		case "repeated-bloat":
+			return {
+				title: "Stop resending static context",
+				detail:
+					"Keep the shared instructions on the agent and send only the small state delta on each call.",
+				impact: `Cost: ${waste}`,
+			};
+		case "context-stuffing":
+			return {
+				title: "Trim context before inference",
+				detail:
+					"Retrieve only relevant chunks, summarize old turns, and cap the prompt budget before model dispatch.",
+				impact:
+					"Cost and latency: smaller prompts make every call cheaper and faster.",
+			};
+		case "tool-loop":
+			return {
+				title: "Bound retries and repeated tools",
+				detail:
+					"Hash tool arguments, stop duplicates, and require a changed input before retrying the same call.",
+				impact:
+					"Reliability: prevents runaway execution and compounding tool cost.",
+			};
+		case "error-tail":
+			return {
+				title: "Handle the final failing step",
+				detail:
+					"Classify the tool error, return a safe fallback, and stop the workflow instead of continuing blindly.",
+				impact:
+					"Reliability: removes failed runs that still consume tokens and tools.",
+			};
+		default:
+			return {
+				title: `Fix ${finding.rule.replaceAll("-", " ")}`,
+				detail:
+					"Change the flagged step, then rerun this trace to verify the finding is gone.",
+				impact:
+					finding.category === "cost"
+						? `Cost: ${waste}`
+						: "Verify with a clean rerun.",
+			};
+	}
+}
+
 function spanMeta(
 	tokensIn: number | null,
 	tokensOut: number | null,
@@ -51,6 +135,7 @@ export function RoastCard({
 		},
 		{ critical: 0, warning: 0, notice: 0 },
 	);
+	const fixes = preview ? [] : roast.findings.slice(0, 4).map(fixForFinding);
 	const scoreStyle: ScoreStyle = {
 		"--score-target": `${roast.score * 3.6}deg`,
 	};
@@ -130,6 +215,31 @@ export function RoastCard({
 
 			{!preview && (
 				<>
+					<section className="public-fixes" aria-labelledby="fixes-heading">
+						<div className="card-section-heading">
+							<h2 id="fixes-heading">Fix plan</h2>
+							<span>{fixes.length} highest-impact changes</span>
+						</div>
+						{fixes.length > 0 ? (
+							<ol>
+								{fixes.map((fix, index) => (
+									<li key={roast.findings[index].rule}>
+										<span>{String(index + 1).padStart(2, "0")}</span>
+										<div>
+											<strong>{fix.title}</strong>
+											<p>{fix.detail}</p>
+											<small>{fix.impact}</small>
+										</div>
+									</li>
+								))}
+							</ol>
+						) : (
+							<p className="card-empty-row">
+								No repair work identified in this trace.
+							</p>
+						)}
+					</section>
+
 					<section className="public-cost" aria-labelledby="cost-heading">
 						<div className="card-section-heading">
 							<h2 id="cost-heading">Cost autopsy</h2>

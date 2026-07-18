@@ -164,6 +164,8 @@ describe("presentational components", () => {
 		expect(screen.getByText("10 tok · 500ms")).toBeTruthy();
 		expect(screen.getByText("15 tok · 1.5s")).toBeTruthy();
 		expect(screen.getByText("$12000")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "Fix plan" })).toBeTruthy();
+		expect(screen.getByText("Rotate exposed credentials")).toBeTruthy();
 
 		rerender(
 			<RoastCard
@@ -253,6 +255,7 @@ describe("interactive components", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Copy roast" }));
 		await screen.findByRole("button", { name: "Copied" });
 		expect(writeText).toHaveBeenCalledWith(expect.stringContaining("12/100"));
+		expect(screen.getByRole("button", { name: "Copy image" })).toBeTruthy();
 
 		fireEvent.click(screen.getByRole("button", { name: "Share" }));
 		await waitFor(() => expect(writeText).toHaveBeenCalledTimes(2));
