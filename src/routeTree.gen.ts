@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
+import { Route as ApiIngestRouteImport } from './routes/api.ingest'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppNewRouteImport } from './routes/app.new'
 import { Route as AppRoastsRouteImport } from './routes/app.roasts'
@@ -51,6 +52,11 @@ const SignupRoute = SignupRouteImport.update({
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
   path: '/update-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIngestRoute = ApiIngestRouteImport.update({
+  id: '/api/ingest',
+  path: '/api/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
   '/app/settings': typeof AppSettingsRoute
   '/r/$slug': typeof RSlugRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/app/new': typeof AppNewRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/update-password'
+    | '/api/ingest'
     | '/app/new'
     | '/app/roasts'
     | '/app/settings'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/update-password'
+    | '/api/ingest'
     | '/app/new'
     | '/app/settings'
     | '/r/$slug'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/update-password'
+    | '/api/ingest'
     | '/app/new'
     | '/app/roasts'
     | '/app/settings'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
+  ApiIngestRoute: typeof ApiIngestRoute
   RSlugRoute: typeof RSlugRoute
 }
 
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/update-password'
       fullPath: '/update-password'
       preLoaderRoute: typeof UpdatePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ingest': {
+      id: '/api/ingest'
+      path: '/api/ingest'
+      fullPath: '/api/ingest'
+      preLoaderRoute: typeof ApiIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
+  ApiIngestRoute: ApiIngestRoute,
   RSlugRoute: RSlugRoute,
 }
 export const routeTree = rootRouteImport

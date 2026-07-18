@@ -1,12 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestUrl, setResponseHeader } from "@tanstack/react-start/server";
+import { getRequestUrl } from "@tanstack/react-start/server";
 import {
 	validateCodeInput,
 	validateCredentials,
 	validateEmailInput,
 	validatePasswordInput,
 } from "./auth";
-import { getSupabaseAuthClient } from "./supabase-auth.server";
+import {
+	getAuthenticatedUser,
+	getSupabaseAuthClient,
+} from "./supabase-auth.server";
 
 export const signUp = createServerFn({ method: "POST" })
 	.validator(validateCredentials)
@@ -62,14 +65,7 @@ export const updatePassword = createServerFn({ method: "POST" })
 	});
 
 export const getCurrentUser = createServerFn({ method: "GET" }).handler(
-	async () => {
-		setResponseHeader("Cache-Control", "private, no-store");
-		setResponseHeader("Vary", "Cookie");
-		const {
-			data: { user },
-		} = await getSupabaseAuthClient().auth.getUser();
-		return user ? { email: user.email ?? "", id: user.id } : null;
-	},
+	getAuthenticatedUser,
 );
 
 export const logOut = createServerFn({ method: "POST" }).handler(async () => {

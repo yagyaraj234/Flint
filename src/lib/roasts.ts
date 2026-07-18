@@ -28,6 +28,36 @@ export interface DashboardStats {
 	worstScoreThisWeek: number | null;
 }
 
+export interface BatchRoast {
+	id: string;
+	slug: string;
+	title: string;
+	status: RoastStatus;
+	score: number;
+	tier: string;
+	error: string | null;
+}
+
+export interface RoastDetail extends RoastListItem {
+	roastLine: string | null;
+	findings: Array<{
+		id: string;
+		rule: string;
+		category: string;
+		severity: number;
+		message: string;
+	}>;
+	cost: {
+		totalTokensIn: number;
+		totalTokensOut: number;
+		totalUsd: number;
+		wasteUsd: number;
+		tokenSource: string;
+		monthlyProjectionUsd: number;
+		projectionAssumption: string;
+	};
+}
+
 export function summarizeRoasts(
 	rows: RoastMetrics[],
 	totalRoasts: number,

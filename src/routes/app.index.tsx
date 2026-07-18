@@ -1,7 +1,6 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
-
-import { RoastTable } from "#/components/roast-table";
 import { useAppSearch } from "#/components/app-shell";
+import { RoastTable } from "#/components/roast-table";
 
 const appRoute = getRouteApi("/app");
 

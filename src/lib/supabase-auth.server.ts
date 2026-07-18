@@ -47,3 +47,18 @@ export function getSupabaseAuthClient() {
 		},
 	});
 }
+
+export async function getAuthenticatedUser() {
+	setResponseHeader("Cache-Control", "private, no-store");
+	setResponseHeader("Vary", "Cookie");
+	const {
+		data: { user },
+	} = await getSupabaseAuthClient().auth.getUser();
+	return user ? { email: user.email ?? "", id: user.id } : null;
+}
+
+export async function requireAuthenticatedUser() {
+	const user = await getAuthenticatedUser();
+	if (!user) throw new Error("Unauthorized.");
+	return user;
+}
