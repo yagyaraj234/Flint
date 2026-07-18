@@ -10,10 +10,17 @@ client = TestClient(app)
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
 CLEAN_TRACE = json.loads((FIXTURES / "clean.json").read_text())
+OWNER_HEADERS = {"Authorization": "Bearer good-token-user-1"}
+SHARED_HEADERS = {"Authorization": "Bearer good-token-user-2"}
+OTHER_HEADERS = {"Authorization": "Bearer good-token-user-3"}
 
 
-def _ingest(title: str) -> str:
-    resp = client.post("/ingest", json={"source": "synthetic", "title": title, "trace": CLEAN_TRACE})
+def _ingest(title: str, headers: dict[str, str] | None = None) -> str:
+    resp = client.post(
+        "/ingest",
+        json={"source": "synthetic", "title": title, "trace": CLEAN_TRACE},
+        headers=headers,
+    )
     return resp.json()["slug"]
 
 
@@ -93,3 +100,40 @@ def test_public_reads_exclude_failed_rows(fake_db: FakeSupabase) -> None:
     )
     assert client.get("/roasts/failed01").status_code == 404
     assert client.get("/roasts/recent").json() == []
+
+
+def test_private_roast_only_serves_owner_or_shared_email(fake_db: FakeSupabase) -> None:
+    slug = _ingest("private", OWNER_HEADERS)
+    row = fake_db.rows[0]
+    row["visibility"] = "private"
+
+    assert client.get(f"/roasts/{slug}").status_code == 404
+    assert client.get(f"/roasts/{slug}", headers=OTHER_HEADERS).status_code == 404
+
+    owner_response = client.get(f"/roasts/{slug}", headers=OWNER_HEADERS)
+    assert owner_response.status_code == 200
+    assert owner_response.json()["is_owner"] is True
+    assert owner_response.json()["visibility"] == "private"
+
+    fake_db.report_shares.append(
+        {
+            "id": "share-1",
+            "roast_id": row["id"],
+            "email": "shared@example.com",
+            "created_by": "user-1",
+            "created_at": "2026-07-18T10:00:00Z",
+        }
+    )
+    shared_response = client.get(f"/roasts/{slug}", headers=SHARED_HEADERS)
+    assert shared_response.status_code == 200
+    assert shared_response.json()["is_owner"] is False
+
+
+def test_recent_excludes_private_roasts(fake_db: FakeSupabase) -> None:
+    _ingest("public")
+    _ingest("private")
+    fake_db.rows[1]["visibility"] = "private"
+
+    response = client.get("/roasts/recent")
+    assert response.status_code == 200
+    assert [row["title"] for row in response.json()] == ["public"]

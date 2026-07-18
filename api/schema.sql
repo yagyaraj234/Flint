@@ -33,6 +33,9 @@ alter table public.roasts
   add column if not exists langsmith_connection_id uuid,
   add column if not exists external_trace_id text;
 
+alter table public.roasts
+  add column if not exists visibility text not null default 'public';
+
 update public.roasts set status = 'done' where status is null;
 update public.roasts set created_at = now() where created_at is null;
 
@@ -47,6 +50,15 @@ begin
   alter table public.roasts
     add constraint roasts_status_check
     check (status in ('processing', 'done', 'failed'));
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter table public.roasts
+    add constraint roasts_visibility_check
+    check (visibility in ('private', 'public'));
 exception
   when duplicate_object then null;
 end $$;
@@ -106,6 +118,19 @@ create index if not exists roasts_status_created_idx on public.roasts (status, c
 alter table public.roasts enable row level security;
 -- No policies: server-side service-role client bypasses RLS.
 alter table public.langsmith_connections enable row level security;
+
+create table if not exists public.report_shares (
+  id uuid primary key default gen_random_uuid(),
+  roast_id uuid not null references public.roasts(id) on delete cascade,
+  email text not null,
+  created_by uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  unique (roast_id, email)
+);
+
+create index if not exists report_shares_roast_idx on public.report_shares (roast_id);
+alter table public.report_shares enable row level security;
+-- no policies: only the FastAPI service role reaches this table
 
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),

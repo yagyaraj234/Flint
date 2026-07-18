@@ -14,12 +14,29 @@ class FakeQuery:
         self._limit: int | None = None
         self._update: dict[str, Any] | None = None
         self._order: tuple[str, bool] | None = None
+        self._upsert: tuple[dict[str, Any], tuple[str, ...]] | None = None
+        self._delete = False
 
     def select(self, *_: Any) -> "FakeQuery":
         return self
 
     def insert(self, row: dict[str, Any]) -> "FakeQuery":
-        self.store.append({"id": f"id-{len(self.store)}", "created_at": "2026-07-18T10:00:00Z", **row})
+        self.store.append(
+            {
+                "id": f"id-{len(self.store)}",
+                "created_at": "2026-07-18T10:00:00Z",
+                "visibility": "public",
+                **row,
+            }
+        )
+        return self
+
+    def upsert(self, row: dict[str, Any], *, on_conflict: str) -> "FakeQuery":
+        self._upsert = (row, tuple(on_conflict.split(",")))
+        return self
+
+    def delete(self) -> "FakeQuery":
+        self._delete = True
         return self
 
     def update(self, patch: dict[str, Any]) -> "FakeQuery":
@@ -43,6 +60,26 @@ class FakeQuery:
         return self
 
     def execute(self) -> Any:
+        if self._upsert is not None:
+            row, conflict_columns = self._upsert
+            existing = next(
+                (
+                    candidate
+                    for candidate in self.store
+                    if all(candidate.get(column) == row.get(column) for column in conflict_columns)
+                ),
+                None,
+            )
+            if existing is None:
+                self.store.append(
+                    {
+                        "id": f"id-{len(self.store)}",
+                        "created_at": "2026-07-18T10:00:00Z",
+                        **row,
+                    }
+                )
+            else:
+                existing.update(row)
         rows = [
             r
             for r in self.store
@@ -52,6 +89,9 @@ class FakeQuery:
         if self._update is not None:
             for row in rows:
                 row.update(self._update)
+        if self._delete:
+            for row in rows:
+                self.store.remove(row)
         if self._order is not None:
             column, descending = self._order
             rows.sort(key=lambda row: row.get(column), reverse=descending)
@@ -63,10 +103,11 @@ class FakeQuery:
 class FakeSupabase:
     def __init__(self) -> None:
         self.rows: list[dict[str, Any]] = []
+        self.report_shares: list[dict[str, Any]] = []
         self.auth = FakeAuth()
 
-    def table(self, _name: str) -> FakeQuery:
-        return FakeQuery(self.rows)
+    def table(self, name: str) -> FakeQuery:
+        return FakeQuery(self.report_shares if name == "report_shares" else self.rows)
 
     def dump(self) -> str:
         return json.dumps(self.rows)
@@ -74,9 +115,15 @@ class FakeSupabase:
 
 class FakeAuth:
     def get_user(self, token: str) -> Any:
-        if token != "good-token-user-1":
+        users = {
+            "good-token-user-1": ("user-1", "owner@example.com"),
+            "good-token-user-2": ("user-2", "shared@example.com"),
+            "good-token-user-3": ("user-3", "other@example.com"),
+        }
+        if token not in users:
             raise ValueError("invalid token")
-        user = type("User", (), {"id": "user-1"})()
+        user_id, email = users[token]
+        user = type("User", (), {"id": user_id, "email": email})()
         return type("UserResponse", (), {"user": user})()
 
 
