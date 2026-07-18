@@ -1,13 +1,15 @@
 """API request/response models — the PLAN.md contract. snake_case everywhere."""
 
+import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.types import CostReport, Finding, NormalizedTrace
 
 Source = Literal["synthetic", "upload", "bfcl", "gaia", "live", "langsmith"]
 TraceFormat = Literal["openai-agents", "generic"]
+Visibility = Literal["private", "public"]
 
 
 RoastStatus = Literal["processing", "done", "failed"]
@@ -104,6 +106,8 @@ class PublicRoast(BaseModel):
     detailed_report: DetailedReport
     normalized: NormalizedTrace
     created_at: str
+    visibility: Visibility
+    is_owner: bool = False
 
 
 class OwnerRoast(BaseModel):
@@ -120,6 +124,33 @@ class OwnerRoast(BaseModel):
     error: str | None = None
     created_at: str
     batch_id: str | None = None
+    visibility: Visibility
+
+
+class SharingShare(BaseModel):
+    email: str
+    created_at: str
+
+
+class SharingInfo(BaseModel):
+    visibility: Visibility
+    shares: list[SharingShare]
+
+
+class ShareCreate(BaseModel):
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        email = value.strip().lower()
+        if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email) is None:
+            raise ValueError("invalid email address")
+        return email
+
+
+class VisibilityUpdate(BaseModel):
+    visibility: Visibility
 
 
 ConnectionStatus = Literal["active", "paused", "invalid", "disconnected"]

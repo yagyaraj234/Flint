@@ -3,8 +3,14 @@
 from typing import Annotated, Any
 
 from fastapi import Header, HTTPException
+from pydantic import BaseModel
 
 from app.db import get_supabase
+
+
+class AuthUser(BaseModel):
+    id: str
+    email: str | None = None
 
 
 def _unauthorized() -> HTTPException:
@@ -20,23 +26,43 @@ def _token_from_header(authorization: str | None) -> str | None:
     return token.strip()
 
 
-def _user_id_for_token(token: str) -> str:
+def _auth_user_for_token(token: str) -> AuthUser:
     try:
         response = get_supabase().auth.get_user(token)
         user: Any = getattr(response, "user", None)
-        user_id: Any = getattr(user, "id", None)
-        if user_id is None and isinstance(response, dict):
-            response_user = response.get("user")
-            user_id = (
-                response_user.get("id")
-                if isinstance(response_user, dict)
-                else getattr(response_user, "id", None)
-            )
+        if user is None and isinstance(response, dict):
+            user = response.get("user")
+        user_id: Any = user.get("id") if isinstance(user, dict) else getattr(user, "id", None)
+        email: Any = user.get("email") if isinstance(user, dict) else getattr(user, "email", None)
     except Exception as exc:
         raise _unauthorized() from exc
     if not isinstance(user_id, str) or not user_id:
         raise _unauthorized()
-    return user_id
+    return AuthUser(id=user_id, email=email if isinstance(email, str) else None)
+
+
+def _user_id_for_token(token: str) -> str:
+    return _auth_user_for_token(token).id
+
+
+def optional_auth_user(
+    authorization: Annotated[str | None, Header()] = None,
+) -> AuthUser | None:
+    """Return token identity, or None only when no credentials were sent."""
+
+    token = _token_from_header(authorization)
+    return _auth_user_for_token(token) if token is not None else None
+
+
+def required_auth_user(
+    authorization: Annotated[str | None, Header()] = None,
+) -> AuthUser:
+    """Return token identity, rejecting unauthenticated requests."""
+
+    user = optional_auth_user(authorization)
+    if user is None:
+        raise _unauthorized()
+    return user
 
 
 def optional_user_id(
