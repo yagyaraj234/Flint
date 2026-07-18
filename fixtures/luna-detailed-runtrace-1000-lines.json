@@ -1,0 +1,1662 @@
+{
+  "trace": {
+    "id": "trace-luna-detailed-support-20260718",
+    "workflow_name": "Detailed billing escalation and recovery workflow",
+    "metadata": {
+      "environment": "staging",
+      "service": "support-escalation-agent",
+      "release": "support-agent@2026.07.18",
+      "run_id": "run_support_01J2LUNA1000",
+      "region": "ap-south-1",
+      "trace_version": "2026-07-18",
+      "pricing_model": "gpt-5.6-luna",
+      "projection_assumption": "at 1,000 runs/day",
+      "purpose": "Large integration fixture for Luna judging, cost analysis, redaction, loop detection, and final-error reporting."
+    },
+    "spans": [
+      {
+        "span_id": "guardrail-input",
+        "parent_id": null,
+        "start_ms": 0,
+        "duration_ms": 12,
+        "span_data": {
+          "type": "guardrail",
+          "name": "input-schema-and-pii-check",
+          "input": {
+            "ticket_id": "SUP-8421",
+            "channel": "email",
+            "priority": "urgent"
+          },
+          "output": {
+            "passed": true,
+            "note": "PII detection intentionally deferred for this test trace."
+          }
+        }
+      },
+      {
+        "span_id": "route-case",
+        "parent_id": "guardrail-input",
+        "start_ms": 20,
+        "duration_ms": 640,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "Route support requests to the least-privileged workflow. Return strict JSON."
+            },
+            {
+              "role": "user",
+              "content": "Customer maya.chen@example.com reports duplicate annual-plan charges and needs a refund."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"queue\":\"billing\",\"priority\":\"urgent\",\"tools\":[\"lookup_subscription\",\"create_refund_case\"]}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1420,
+            "output_tokens": 180
+          }
+        }
+      },
+      {
+        "span_id": "lookup-subscription",
+        "parent_id": "route-case",
+        "start_ms": 670,
+        "duration_ms": 220,
+        "span_data": {
+          "type": "function",
+          "name": "lookup_subscription",
+          "arguments": {
+            "customer_id": "cus_demo_maya_chen",
+            "ticket_id": "SUP-8421"
+          },
+          "result": {
+            "plan": "annual-pro",
+            "duplicate_renewals": 2,
+            "eligible_for_refund": true
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-1",
+        "parent_id": "lookup-subscription",
+        "start_ms": 1260,
+        "duration_ms": 341,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 1
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-2",
+        "parent_id": "lookup-subscription",
+        "start_ms": 1620,
+        "duration_ms": 342,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 2
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-3",
+        "parent_id": "lookup-subscription",
+        "start_ms": 1980,
+        "duration_ms": 343,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 3
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-4",
+        "parent_id": "lookup-subscription",
+        "start_ms": 2340,
+        "duration_ms": 344,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 4
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-5",
+        "parent_id": "lookup-subscription",
+        "start_ms": 2700,
+        "duration_ms": 345,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 5
+          }
+        }
+      },
+      {
+        "span_id": "refund-attempt-6",
+        "parent_id": "lookup-subscription",
+        "start_ms": 3060,
+        "duration_ms": 346,
+        "span_data": {
+          "type": "function",
+          "name": "create_refund_case",
+          "arguments": {
+            "endpoint": "http://billing.internal.example/refunds",
+            "ticket_id": "SUP-8421",
+            "amount_usd": 120
+          },
+          "result": {
+            "queued": false,
+            "retryable": true,
+            "attempt": 6
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-01",
+        "parent_id": "route-case",
+        "start_ms": 3920,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 1 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":1,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1807,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-02",
+        "parent_id": "escalation-step-01",
+        "start_ms": 4440,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-02",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-002",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-03",
+        "parent_id": "escalation-step-02",
+        "start_ms": 4960,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 3 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":3,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1821,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-04",
+        "parent_id": "escalation-step-03",
+        "start_ms": 5480,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-04",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-004",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-05",
+        "parent_id": "escalation-step-04",
+        "start_ms": 6000,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 5 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":5,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1835,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-06",
+        "parent_id": "escalation-step-05",
+        "start_ms": 6520,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-06",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-006",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-07",
+        "parent_id": "escalation-step-06",
+        "start_ms": 7040,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 7 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":7,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1849,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-08",
+        "parent_id": "escalation-step-07",
+        "start_ms": 7560,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-08",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-008",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-09",
+        "parent_id": "escalation-step-08",
+        "start_ms": 8080,
+        "duration_ms": 870,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 9 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":9,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1863,
+            "output_tokens": 254
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-10",
+        "parent_id": "escalation-step-09",
+        "start_ms": 8600,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-10",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-010",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-11",
+        "parent_id": "escalation-step-10",
+        "start_ms": 9120,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 11 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":11,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1877,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-12",
+        "parent_id": "escalation-step-11",
+        "start_ms": 9640,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-12",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-012",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-13",
+        "parent_id": "escalation-step-12",
+        "start_ms": 10160,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 13 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":13,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1891,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-14",
+        "parent_id": "escalation-step-13",
+        "start_ms": 10680,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-14",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-014",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-15",
+        "parent_id": "escalation-step-14",
+        "start_ms": 11200,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 15 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":15,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1905,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-16",
+        "parent_id": "escalation-step-15",
+        "start_ms": 11720,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-16",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-016",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-17",
+        "parent_id": "escalation-step-16",
+        "start_ms": 12240,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 17 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":17,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1919,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-18",
+        "parent_id": "escalation-step-17",
+        "start_ms": 12760,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-18",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-018",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-19",
+        "parent_id": "escalation-step-18",
+        "start_ms": 13280,
+        "duration_ms": 870,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 19 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":19,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1933,
+            "output_tokens": 254
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-20",
+        "parent_id": "escalation-step-19",
+        "start_ms": 13800,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-20",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-020",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-21",
+        "parent_id": "escalation-step-20",
+        "start_ms": 14320,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 21 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":21,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1947,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-22",
+        "parent_id": "escalation-step-21",
+        "start_ms": 14840,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-22",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-022",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-23",
+        "parent_id": "escalation-step-22",
+        "start_ms": 15360,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 23 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":23,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1961,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-24",
+        "parent_id": "escalation-step-23",
+        "start_ms": 15880,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-24",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-024",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-25",
+        "parent_id": "escalation-step-24",
+        "start_ms": 16400,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 25 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":25,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1975,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-26",
+        "parent_id": "escalation-step-25",
+        "start_ms": 16920,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-26",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-026",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-27",
+        "parent_id": "escalation-step-26",
+        "start_ms": 17440,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 27 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":27,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 1989,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-28",
+        "parent_id": "escalation-step-27",
+        "start_ms": 17960,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-28",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-028",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-29",
+        "parent_id": "escalation-step-28",
+        "start_ms": 18480,
+        "duration_ms": 870,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 29 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":29,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2003,
+            "output_tokens": 254
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-30",
+        "parent_id": "escalation-step-29",
+        "start_ms": 19000,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-30",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-030",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-31",
+        "parent_id": "escalation-step-30",
+        "start_ms": 19520,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 31 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":31,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2017,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-32",
+        "parent_id": "escalation-step-31",
+        "start_ms": 20040,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-32",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-032",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-33",
+        "parent_id": "escalation-step-32",
+        "start_ms": 20560,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 33 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":33,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2031,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-34",
+        "parent_id": "escalation-step-33",
+        "start_ms": 21080,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-34",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-034",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-35",
+        "parent_id": "escalation-step-34",
+        "start_ms": 21600,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 35 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":35,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2045,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-36",
+        "parent_id": "escalation-step-35",
+        "start_ms": 22120,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-36",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-036",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-37",
+        "parent_id": "escalation-step-36",
+        "start_ms": 22640,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 37 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":37,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2059,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-38",
+        "parent_id": "escalation-step-37",
+        "start_ms": 23160,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-38",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-038",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-39",
+        "parent_id": "escalation-step-38",
+        "start_ms": 23680,
+        "duration_ms": 870,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 39 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":39,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2073,
+            "output_tokens": 254
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-40",
+        "parent_id": "escalation-step-39",
+        "start_ms": 24200,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-40",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-040",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-41",
+        "parent_id": "escalation-step-40",
+        "start_ms": 24720,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 41 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":41,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2087,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-42",
+        "parent_id": "escalation-step-41",
+        "start_ms": 25240,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-42",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-042",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-43",
+        "parent_id": "escalation-step-42",
+        "start_ms": 25760,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 43 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":43,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2101,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-44",
+        "parent_id": "escalation-step-43",
+        "start_ms": 26280,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-44",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-044",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-45",
+        "parent_id": "escalation-step-44",
+        "start_ms": 26800,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 45 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":45,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2115,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-46",
+        "parent_id": "escalation-step-45",
+        "start_ms": 27320,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-46",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-046",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-47",
+        "parent_id": "escalation-step-46",
+        "start_ms": 27840,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 47 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":47,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2129,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-48",
+        "parent_id": "escalation-step-47",
+        "start_ms": 28360,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "audit_billing_event",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-48",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-048",
+            "message": "Evidence recorded."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-49",
+        "parent_id": "escalation-step-48",
+        "start_ms": 28880,
+        "duration_ms": 870,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 49 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":49,\"decision\":\"collect_evidence\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"audit_billing_event\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2143,
+            "output_tokens": 254
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-50",
+        "parent_id": "escalation-step-49",
+        "start_ms": 29400,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "notify_billing_on_call",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-50",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-050",
+            "message": "Human escalation queued."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-51",
+        "parent_id": "escalation-step-50",
+        "start_ms": 29920,
+        "duration_ms": 750,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 51 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":51,\"decision\":\"prepare_human_handoff\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"notify_billing_on_call\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2157,
+            "output_tokens": 221
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-52",
+        "parent_id": "escalation-step-51",
+        "start_ms": 30440,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "notify_billing_on_call",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-52",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-052",
+            "message": "Human escalation queued."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-53",
+        "parent_id": "escalation-step-52",
+        "start_ms": 30960,
+        "duration_ms": 830,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 53 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":53,\"decision\":\"prepare_human_handoff\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"notify_billing_on_call\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2171,
+            "output_tokens": 243
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-54",
+        "parent_id": "escalation-step-53",
+        "start_ms": 31480,
+        "duration_ms": 280,
+        "span_data": {
+          "type": "function",
+          "name": "notify_billing_on_call",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-54",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-054",
+            "message": "Human escalation queued."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-55",
+        "parent_id": "escalation-step-54",
+        "start_ms": 32000,
+        "duration_ms": 710,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 55 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":55,\"decision\":\"prepare_human_handoff\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"notify_billing_on_call\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2185,
+            "output_tokens": 210
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-56",
+        "parent_id": "escalation-step-55",
+        "start_ms": 32520,
+        "duration_ms": 230,
+        "span_data": {
+          "type": "function",
+          "name": "notify_billing_on_call",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-56",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": true,
+            "audit_event": "billing-event-056",
+            "message": "Human escalation queued."
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-57",
+        "parent_id": "escalation-step-56",
+        "start_ms": 33040,
+        "duration_ms": 790,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-5.6-luna",
+          "input": [
+            {
+              "role": "system",
+              "content": "You are a billing escalation agent. Summarize evidence, select one safe next action, and do not expose customer data."
+            },
+            {
+              "role": "user",
+              "content": "Ticket SUP-8421: duplicate annual renewal. Use only supplied account facts. Step 57 of the escalation workflow."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "{\"step\":57,\"decision\":\"prepare_human_handoff\",\"rationale\":\"Duplicate renewal is eligible for refund; gateway has not confirmed a case.\",\"next_tool\":\"notify_billing_on_call\"}"
+            }
+          ],
+          "usage": {
+            "input_tokens": 2199,
+            "output_tokens": 232
+          }
+        }
+      },
+      {
+        "span_id": "escalation-step-58",
+        "parent_id": "escalation-step-57",
+        "start_ms": 33560,
+        "duration_ms": 280,
+        "meta": {
+          "status": "error",
+          "error_code": "BILLING_GATEWAY_TIMEOUT",
+          "retryable": false
+        },
+        "span_data": {
+          "type": "function",
+          "name": "notify_billing_on_call",
+          "arguments": {
+            "ticket_id": "SUP-8421",
+            "correlation_id": "corr-support-8421-58",
+            "requested_by": "billing-escalation-agent"
+          },
+          "result": {
+            "accepted": false,
+            "audit_event": "billing-event-058",
+            "message": "Human escalation queued."
+          }
+        }
+      }
+    ]
+  }
+}
