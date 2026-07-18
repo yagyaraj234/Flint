@@ -2,10 +2,10 @@
 import { JSDOM } from "jsdom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const state = vi.hoisted(() => ({
+const state = {
 	createBillingCheckout: vi.fn(),
 	getBillingStatus: vi.fn(),
-}));
+};
 
 vi.mock("#/lib/billing.functions", () => state);
 vi.mock("@tanstack/react-router", () => ({
@@ -66,7 +66,7 @@ Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
 	writable: true,
 });
 
-const { cleanup, fireEvent, render, screen, waitFor } = await import(
+const { cleanup, fireEvent, render, waitFor } = await import(
 	"@testing-library/react"
 );
 const { AppShell } = await import("#/components/app-shell");
@@ -91,10 +91,10 @@ describe("billing page", () => {
 		state.createBillingCheckout.mockResolvedValue(
 			"https://checkout.test/session",
 		);
-		render(<BillingPage />);
+		const view = render(<BillingPage />);
 
-		await waitFor(() => expect(screen.getByText("2 / 5")).toBeTruthy());
-		fireEvent.click(screen.getByRole("button", { name: "Upgrade to Pro" }));
+		await waitFor(() => expect(view.getByText("2 / 5")).toBeTruthy());
+		fireEvent.click(view.getByRole("button", { name: "Upgrade to Pro" }));
 		await waitFor(() =>
 			expect(assign).toHaveBeenCalledWith("https://checkout.test/session"),
 		);
@@ -107,11 +107,11 @@ describe("billing page", () => {
 			credits_remaining: 42,
 			current_period_end: "2026-08-18T00:00:00Z",
 		});
-		render(<BillingPage />);
+		const view = render(<BillingPage />);
 
-		await waitFor(() => expect(screen.getByText("42")).toBeTruthy());
-		expect(screen.getByText(/Aug 18, 2026/)).toBeTruthy();
-		expect(screen.queryByRole("button", { name: "Upgrade to Pro" })).toBeNull();
+		await waitFor(() => expect(view.getByText("42")).toBeTruthy());
+		expect(view.getByText(/Aug 18, 2026/)).toBeTruthy();
+		expect(view.queryByRole("button", { name: "Upgrade to Pro" })).toBeNull();
 	});
 });
 
@@ -121,10 +121,12 @@ test("app nav shows billing link with current plan badge", async () => {
 		status: "active",
 		credits_remaining: 42,
 	});
-	render(<AppShell totalRoasts={3} user={{ email: "user@example.com" }} />);
+	const view = render(
+		<AppShell totalRoasts={3} user={{ email: "user@example.com" }} />,
+	);
 
-	expect(
-		screen.getByRole("link", { name: /Billing/ }).getAttribute("href"),
-	).toBe("/app/billing");
-	await waitFor(() => expect(screen.getByText("Pro")).toBeTruthy());
+	expect(view.getByRole("link", { name: /Billing/ }).getAttribute("href")).toBe(
+		"/app/billing",
+	);
+	await waitFor(() => expect(view.getByText("Pro")).toBeTruthy());
 });

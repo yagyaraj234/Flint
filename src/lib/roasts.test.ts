@@ -103,6 +103,12 @@ describe("dashboard roast helpers", () => {
 				waste_usd: 1.25,
 			},
 			created_at: "2026-07-18T12:00:00.000Z",
+			detailed_report: {
+				summary: "A secret reached a tool call.",
+				actions: [],
+				generated: false,
+				model: null,
+			},
 			error: null,
 			findings: [
 				{

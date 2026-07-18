@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const state = vi.hoisted(() => ({
+const state = {
 	api: {
 		getMyRoasts: vi.fn(),
 		getRecentRoasts: vi.fn(),
@@ -9,11 +9,15 @@ const state = vi.hoisted(() => ({
 		ingestTrace: vi.fn(),
 	},
 	auth: {
+		getAccessToken: vi.fn(),
 		requireAccessToken: vi.fn(),
 		requireAuthenticatedUser: vi.fn(),
 	},
 	routes: new Map<string, { options: Record<string, unknown> }>(),
-}));
+	server: {
+		setResponseHeader: vi.fn(),
+	},
+};
 
 vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: (path: string) => (options: Record<string, unknown>) => {
@@ -47,6 +51,7 @@ vi.mock("@tanstack/react-start", () => ({
 
 vi.mock("#/lib/api", () => state.api);
 vi.mock("#/lib/supabase-auth.server", () => state.auth);
+vi.mock("@tanstack/react-start/server", () => state.server);
 
 const appModule = await import("./app");
 const batchModule = await import("./app.roasts.$batch");
@@ -91,7 +96,9 @@ const ownerRoast = {
 beforeEach(() => {
 	for (const fn of Object.values(state.api)) fn.mockReset();
 	for (const fn of Object.values(state.auth)) fn.mockReset();
+	for (const fn of Object.values(state.server)) fn.mockReset();
 	state.auth.requireAccessToken.mockResolvedValue("access-token");
+	state.auth.getAccessToken.mockResolvedValue(null);
 	state.auth.requireAuthenticatedUser.mockResolvedValue({ id: "user-id" });
 	state.api.getMyRoasts.mockResolvedValue([]);
 	state.api.getRecentRoasts.mockResolvedValue([]);
@@ -185,6 +192,75 @@ describe("public and ingest route boundaries", () => {
 
 		expect(await getPublicRoast({ data: "bad slug" })).toBeNull();
 		expect(state.api.getRoast).not.toHaveBeenCalled();
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Cache-Control",
+			"private, no-store",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Vary",
+			"Cookie",
+		);
+		state.server.setResponseHeader.mockClear();
+
+		state.auth.getAccessToken.mockResolvedValue("access-token");
+		state.api.getRoast.mockResolvedValue({
+			...ownerRoast,
+			detailed_report: {
+				summary: "Owner report.",
+				actions: [],
+				generated: false,
+				model: null,
+			},
+			is_owner: true,
+			normalized: { trace_id: "trace-1", workflow: "test", spans: [] },
+			roast_line: null,
+			visibility: "private",
+		});
+		await expect(
+			getPublicRoast({ data: ownerRoast.slug }),
+		).resolves.toMatchObject({ isOwner: true, visibility: "private" });
+		expect(state.api.getRoast).toHaveBeenCalledWith(
+			ownerRoast.slug,
+			"access-token",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledTimes(2);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Cache-Control",
+			"private, no-store",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Vary",
+			"Cookie",
+		);
+	});
+
+	test("retries rejected authenticated public reads without a token", async () => {
+		state.auth.getAccessToken.mockResolvedValue("expired-token");
+		state.api.getRoast
+			.mockRejectedValueOnce(new Error("getRoast failed: 401"))
+			.mockResolvedValueOnce({
+				...ownerRoast,
+				detailed_report: {
+					summary: "Public report.",
+					actions: [],
+					generated: false,
+					model: null,
+				},
+				is_owner: false,
+				normalized: { trace_id: "trace-1", workflow: "test", spans: [] },
+				roast_line: null,
+				visibility: "public",
+			});
+
+		await expect(
+			getPublicRoast({ data: ownerRoast.slug }),
+		).resolves.toMatchObject({ slug: ownerRoast.slug });
+		expect(state.api.getRoast).toHaveBeenNthCalledWith(
+			1,
+			ownerRoast.slug,
+			"expired-token",
+		);
+		expect(state.api.getRoast).toHaveBeenNthCalledWith(2, ownerRoast.slug);
 	});
 
 	test("forwards the authenticated ingest endpoint payload to FastAPI", async () => {

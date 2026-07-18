@@ -41,7 +41,7 @@ function groupFindings(findings: PublicRoast["findings"]): FindingGroup[] {
 	return [...groups.values()];
 }
 
-function fixForFinding(finding: PublicRoast["findings"][number]): {
+export function fixForFinding(finding: PublicRoast["findings"][number]): {
 	title: string;
 	detail: string;
 	impact: string;

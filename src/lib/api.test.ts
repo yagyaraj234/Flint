@@ -3,15 +3,16 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { getMyRoasts, getRoast, ingestBatch, ingestTrace } from "./api";
 
 const fetchMock = vi.fn();
+const originalFetch = globalThis.fetch;
 
 afterEach(() => {
-	vi.unstubAllGlobals();
+	globalThis.fetch = originalFetch;
 	fetchMock.mockReset();
 });
 
 describe("FastAPI helpers", () => {
 	test("sends owner batch requests with the Supabase bearer token", async () => {
-		vi.stubGlobal("fetch", fetchMock);
+		globalThis.fetch = fetchMock as typeof fetch;
 		fetchMock.mockResolvedValueOnce(
 			Response.json({
 				batch_id: "batch-id",
@@ -38,7 +39,7 @@ describe("FastAPI helpers", () => {
 	});
 
 	test("keeps single ingest anonymous and treats public 404s as missing", async () => {
-		vi.stubGlobal("fetch", fetchMock);
+		globalThis.fetch = fetchMock as typeof fetch;
 		fetchMock.mockResolvedValueOnce(Response.json({ slug: "live" }));
 		await expect(ingestTrace({ source: "live", trace: {} })).resolves.toEqual({
 			slug: "live",
@@ -49,5 +50,12 @@ describe("FastAPI helpers", () => {
 
 		fetchMock.mockResolvedValueOnce(new Response(null, { status: 404 }));
 		await expect(getRoast("missing")).resolves.toBeNull();
+
+		fetchMock.mockResolvedValueOnce(Response.json({ slug: "private" }));
+		await getRoast("private", "access-token");
+		expect(fetchMock).toHaveBeenLastCalledWith(
+			"http://localhost:8000/roasts/private",
+			{ headers: { authorization: "Bearer access-token" } },
+		);
 	});
 });
