@@ -1107,10 +1107,40 @@ textarea {
 .public-page .public-findings li {
 	border-color: #e8ddd1;
 	background: rgba(255, 255, 255, 0.56);
+	padding: 22px;
 }
 
 .public-page .finding-tags span {
 	border-color: rgba(200, 75, 22, 0.38);
+	font-size: 8px;
+}
+
+.public-page .public-findings li strong {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.public-page .public-findings li p {
+	color: #5f5148;
+	font-size: 14px;
+	line-height: 1.65;
+}
+
+.public-page .public-findings li small {
+	color: #78695f;
+	font-size: 9px;
+}
+
+.public-page .card-section-heading h2 {
+	font-size: 30px;
+}
+
+.public-page .cost-grid span {
+	font-size: 9px;
+}
+
+.public-page .cost-grid strong {
+	font-size: clamp(24px, 2.8vw, 34px);
 }
 
 .public-fixes {
@@ -1850,6 +1880,10 @@ button:focus-visible,
 		grid-template-columns: 1fr;
 		gap: 11px;
 		padding: 15px;
+	}
+
+	.public-page .public-findings li p {
+		font-size: 13px;
 	}
 
 	.public-fixes ol {

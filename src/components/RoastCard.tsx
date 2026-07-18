@@ -4,6 +4,11 @@ import { fallbackRoastLine, type PublicRoast } from "../lib/public-roasts";
 import { ShareButtons } from "./ShareButtons";
 
 type ScoreStyle = CSSProperties & { "--score-target": `${number}deg` };
+type FindingGroup = {
+	count: number;
+	finding: PublicRoast["findings"][number];
+	key: string;
+};
 
 function money(value: number): string {
 	return `$${value.toFixed(value < 10 ? 2 : 0)}`;
@@ -11,6 +16,22 @@ function money(value: number): string {
 
 function tierSlug(tier: string): string {
 	return tier.toLowerCase().replaceAll(" ", "-");
+}
+
+function groupFindings(findings: PublicRoast["findings"]): FindingGroup[] {
+	const groups = new Map<string, FindingGroup>();
+	for (const finding of findings) {
+		const key = [
+			finding.rule,
+			finding.category,
+			finding.severity,
+			finding.message,
+		].join("\u0000");
+		const group = groups.get(key);
+		if (group) group.count += 1;
+		else groups.set(key, { count: 1, finding, key });
+	}
+	return [...groups.values()];
 }
 
 function fixForFinding(finding: PublicRoast["findings"][number]): {
@@ -123,9 +144,10 @@ export function RoastCard({
 	preview?: boolean;
 }) {
 	const line = roast.roastLine ?? fallbackRoastLine(roast.tier);
+	const findingGroups = groupFindings(roast.findings);
 	const findings = preview
-		? roast.findings.slice(0, 1)
-		: roast.findings.slice(0, 3);
+		? findingGroups.slice(0, 1)
+		: findingGroups.slice(0, 3);
 	const findingCounts = roast.findings.reduce(
 		(counts, finding) => {
 			if (finding.severity === 3) counts.critical += 1;
@@ -135,7 +157,14 @@ export function RoastCard({
 		},
 		{ critical: 0, warning: 0, notice: 0 },
 	);
-	const fixes = preview ? [] : roast.findings.slice(0, 4).map(fixForFinding);
+	const fixes = preview
+		? []
+		: findingGroups.slice(0, 4).map(({ count, finding, key }) => ({
+				count,
+				...fixForFinding(finding),
+				finding,
+				key,
+			}));
 	const scoreStyle: ScoreStyle = {
 		"--score-target": `${roast.score * 3.6}deg`,
 	};
@@ -183,15 +212,18 @@ export function RoastCard({
 			>
 				<div className="card-section-heading">
 					<h2 id={preview ? undefined : "findings-heading"}>Findings</h2>
-					<span>{roast.findings.length} total</span>
+					<span>
+						{roast.findings.length} signals · {findingGroups.length} categories
+					</span>
 				</div>
 				{findings.length > 0 ? (
 					<ol>
-						{findings.map((finding) => (
+						{findings.map(({ count, finding }) => (
 							<li key={`${finding.rule}-${finding.message}`}>
 								<div className="finding-tags">
 									<span>SEV {finding.severity}</span>
 									<span>{finding.category}</span>
+									{count > 1 && <span>seen {count}×</span>}
 								</div>
 								<div>
 									<strong>{finding.rule.replaceAll("-", " ")}</strong>
@@ -206,9 +238,9 @@ export function RoastCard({
 				) : (
 					<p className="card-empty-row">No material finding in this trace.</p>
 				)}
-				{!preview && roast.findings.length > 3 && (
+				{!preview && findingGroups.length > 3 && (
 					<p className="finding-overflow">
-						+ {roast.findings.length - 3} lower-priority findings
+						+ {findingGroups.length - 3} lower-priority categories
 					</p>
 				)}
 			</section>
@@ -223,12 +255,15 @@ export function RoastCard({
 						{fixes.length > 0 ? (
 							<ol>
 								{fixes.map((fix, index) => (
-									<li key={roast.findings[index].rule}>
+									<li key={fix.key}>
 										<span>{String(index + 1).padStart(2, "0")}</span>
 										<div>
 											<strong>{fix.title}</strong>
 											<p>{fix.detail}</p>
-											<small>{fix.impact}</small>
+											<small>
+												{fix.count > 1 ? `${fix.count} occurrences · ` : ""}
+												{fix.impact}
+											</small>
 										</div>
 									</li>
 								))}

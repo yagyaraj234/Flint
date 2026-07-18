@@ -159,13 +159,20 @@ describe("presentational components", () => {
 		expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
 			"This agent cooked the budget",
 		);
-		expect(screen.getByText("+ 1 lower-priority findings")).toBeTruthy();
+		expect(screen.getByText("+ 1 lower-priority categories")).toBeTruthy();
 		expect(screen.getByText("tokens n/a · duration n/a")).toBeTruthy();
 		expect(screen.getByText("10 tok · 500ms")).toBeTruthy();
 		expect(screen.getByText("15 tok · 1.5s")).toBeTruthy();
 		expect(screen.getByText("$12000")).toBeTruthy();
 		expect(screen.getByRole("heading", { name: "Fix plan" })).toBeTruthy();
 		expect(screen.getByText("Rotate exposed credentials")).toBeTruthy();
+
+		rerender(
+			<RoastCard
+				roast={{ ...roast, findings: [...roast.findings, roast.findings[1]] }}
+			/>,
+		);
+		expect(screen.getByText("seen 2×")).toBeTruthy();
 
 		rerender(
 			<RoastCard
