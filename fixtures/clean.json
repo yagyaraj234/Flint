@@ -1,0 +1,77 @@
+{
+  "trace": {
+    "id": "trace-clean",
+    "workflow_name": "Order status",
+    "spans": [
+      {
+        "span_id": "span-understand",
+        "parent_id": null,
+        "start_ms": 0,
+        "duration_ms": 210,
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-4.1-mini",
+          "input": [
+            {
+              "role": "user",
+              "content": "Where is order R0-123?"
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "I will look up that order."
+            }
+          ],
+          "usage": {
+            "input_tokens": 12,
+            "output_tokens": 8
+          }
+        }
+      },
+      {
+        "span_id": "span-order-tool",
+        "parent_id": "span-understand",
+        "start_ms": 220,
+        "duration_ms": 90,
+        "span_data": {
+          "type": "function",
+          "name": "get_order_status",
+          "input": {
+            "order_id": "R0-123"
+          },
+          "output": {
+            "status": "shipped",
+            "eta": "2026-07-20"
+          }
+        }
+      },
+      {
+        "span_id": "span-final",
+        "parent_id": "span-understand",
+        "start_ms": 320,
+        "duration_ms": 190,
+        "span_data": {
+          "type": "response",
+          "model": "gpt-4.1-mini",
+          "input": [
+            {
+              "role": "tool",
+              "content": "{\"status\":\"shipped\",\"eta\":\"2026-07-20\"}"
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "Order R0-123 shipped and arrives July 20."
+            }
+          ],
+          "usage": {
+            "input_tokens": 24,
+            "output_tokens": 13
+          }
+        }
+      }
+    ]
+  }
+}

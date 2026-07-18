@@ -1,0 +1,77 @@
+{
+  "trace": {
+    "id": "trace-leaked-key",
+    "workflow_name": "Leaked key demo",
+    "spans": [
+      {
+        "span_id": "span-plan",
+        "parent_id": null,
+        "started_at": "2026-07-18T09:00:00Z",
+        "ended_at": "2026-07-18T09:00:00.250Z",
+        "span_data": {
+          "type": "generation",
+          "model": "gpt-4.1-mini",
+          "input": [
+            {
+              "role": "user",
+              "content": "Check the deployment status."
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "I will inspect the deployment."
+            }
+          ],
+          "usage": {
+            "input_tokens": 14,
+            "output_tokens": 10
+          }
+        }
+      },
+      {
+        "span_id": "span-deploy",
+        "parent_id": "span-plan",
+        "started_at": "2026-07-18T09:00:00.260Z",
+        "ended_at": "2026-07-18T09:00:00.500Z",
+        "span_data": {
+          "type": "function",
+          "name": "deployment_status",
+          "input": {
+            "environment": "production",
+            "api_key": "sk-FAKE000000000000000000000000"
+          },
+          "output": {
+            "status": "healthy"
+          }
+        }
+      },
+      {
+        "span_id": "span-answer",
+        "parent_id": "span-plan",
+        "started_at": "2026-07-18T09:00:00.510Z",
+        "ended_at": "2026-07-18T09:00:00.800Z",
+        "span_data": {
+          "type": "response",
+          "model": "gpt-4.1-mini",
+          "input": [
+            {
+              "role": "tool",
+              "content": "{\"status\":\"healthy\"}"
+            }
+          ],
+          "output": [
+            {
+              "role": "assistant",
+              "content": "Production is healthy."
+            }
+          ],
+          "usage": {
+            "input_tokens": 21,
+            "output_tokens": 6
+          }
+        }
+      }
+    ]
+  }
+}
