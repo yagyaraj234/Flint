@@ -56,6 +56,9 @@ POST /ingest/batch
   (score 0, tier "Unknown", empty findings/cost) so the batch view can show it.
   With >1 trace, titles get a " N" suffix.
 
+Authenticated ingest can also return the free-tier `402` documented in
+`PAYMENTS-PLAN.md`; anonymous ingest remains unchanged.
+
 GET /roasts/{slug}                       // public card read, 'done' rows only
   200: { slug, title, source, score, tier, roast_line, status, findings, cost,
          normalized, created_at } | 404

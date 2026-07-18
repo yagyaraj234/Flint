@@ -5,6 +5,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 
+from app.billing.dodo_client import ingest_usage_event
 from app.config import get_settings
 from app.db import get_supabase
 from app.integrations.langsmith import (
@@ -141,10 +142,37 @@ def patch_connection(connection_id: str, data: LangSmithConnectionUpdate, user_i
 
 @router.post("/{connection_id}/sync")
 def sync(connection_id: str, user_id: UserId) -> dict[str, object]:
-    if not get_connection(get_supabase(), user_id, connection_id):
+    db = get_supabase()
+    if not get_connection(db, user_id, connection_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Connection not found")
-    count = sync_connection(get_supabase(), connection_id)
-    connection = get_connection(get_supabase(), user_id, connection_id)
+    subscription = (
+        db.table("subscriptions")
+        .select("plan,dodo_customer_id")
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+        .data
+    )
+    if not subscription or subscription[0].get("plan") != "pro":
+        db.table("langsmith_connections").update(
+            {
+                "status": "paused",
+                "last_error": "Upgrade to Pro to enable automatic sync",
+            }
+        ).eq("id", connection_id).eq("user_id", user_id).execute()
+        count = 0
+    else:
+        count = sync_connection(db, connection_id)
+        customer_id = subscription[0].get("dodo_customer_id")
+        if isinstance(customer_id, str) and customer_id:
+            settings = get_settings()
+            for _ in range(count):
+                ingest_usage_event(
+                    customer_id,
+                    api_key=settings.dodo_api_key,
+                    environment=settings.dodo_environment,
+                )
+    connection = get_connection(db, user_id, connection_id)
     return {"scanned": count, "connection": connection.model_dump() if connection else None}
 
 
