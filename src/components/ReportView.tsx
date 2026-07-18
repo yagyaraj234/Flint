@@ -1,8 +1,10 @@
-import type {
-	PublicFinding,
-	PublicFindingCategory,
-	PublicRoast,
+import {
+	fallbackRoastLine,
+	type PublicFinding,
+	type PublicFindingCategory,
+	type PublicRoast,
 } from "../lib/public-roasts";
+import { ShareButtons } from "./ShareButtons";
 import { ShareDialog } from "./ShareDialog";
 
 const categoryOrder: PublicFindingCategory[] = [
@@ -48,7 +50,26 @@ function severityLabel(severity: PublicFinding["severity"]): string {
 	return "Low";
 }
 
+function spanMeta(
+	tokensIn: number | null,
+	tokensOut: number | null,
+	durationMs: number | null,
+): string {
+	const tokens =
+		tokensIn === null && tokensOut === null
+			? "tokens n/a"
+			: `${(tokensIn ?? 0) + (tokensOut ?? 0)} tok`;
+	const duration =
+		durationMs === null
+			? "duration n/a"
+			: durationMs >= 1000
+				? `${(durationMs / 1000).toFixed(1)}s`
+				: `${durationMs}ms`;
+	return `${tokens} · ${duration}`;
+}
+
 export function ReportView({ roast }: { roast: PublicRoast }) {
+	const line = roast.roastLine ?? fallbackRoastLine(roast.tier);
 	const findingGroups = categoryOrder.flatMap((category) => {
 		const findings = roast.findings
 			.filter((finding) => finding.category === category)
@@ -65,6 +86,7 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 					<p className="report-view__meta mono-label">
 						{roast.source} · {formatDate(roast.createdAt)} · {roast.traceId}
 					</p>
+					<ShareButtons roast={roast} />
 					<ShareDialog slug={roast.slug} isOwner={roast.isOwner} />
 				</div>
 				<div className="report-score" data-grade={scoreGrade(roast.score)}>
@@ -163,7 +185,9 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 				className="report-view__section report-view__section--cost"
 				aria-labelledby="report-cost-heading"
 			>
-				<p className="mono-label">Usage and waste</p>
+				<p className="mono-label">
+					Usage and waste · {roast.cost.tokenSource} usage
+				</p>
 				<h2 id="report-cost-heading">Cost</h2>
 				<dl className="report-costs">
 					<div>
@@ -196,9 +220,32 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 				)}
 			</section>
 
-			{roast.roastLine && (
-				<aside className="report-view__roast">“{roast.roastLine}”</aside>
-			)}
+			<details className="public-timeline">
+				<summary>
+					<span>Trace timeline</span>
+					<small>{roast.timeline.length} spans · expand</small>
+				</summary>
+				{roast.timeline.length > 0 ? (
+					<ol>
+						{roast.timeline.map((span, index) => (
+							<li key={span.id}>
+								<span>{String(index + 1).padStart(2, "0")}</span>
+								<div>
+									<small>{span.type}</small>
+									<strong>{span.name}</strong>
+								</div>
+								<code>
+									{spanMeta(span.tokensIn, span.tokensOut, span.durationMs)}
+								</code>
+							</li>
+						))}
+					</ol>
+				) : (
+					<p className="card-empty-row">No normalized spans available.</p>
+				)}
+			</details>
+
+			<aside className="report-view__roast">“{line}”</aside>
 		</article>
 	);
 }

@@ -229,7 +229,11 @@ describe("presentational components", () => {
 		).toBeTruthy();
 		expect(screen.getByText("$12,000.00")).toBeTruthy();
 		expect(screen.getByRole("note").textContent).toContain("custom-model");
-		expect(screen.queryByText(/cooked the budget/)).toBeNull();
+		expect(screen.getByText(/measured usage/)).toBeTruthy();
+		expect(screen.getByText("Copy roast")).toBeTruthy();
+		expect(screen.getByText("Trace timeline")).toBeTruthy();
+		expect(screen.getByText("15 tok · 1.5s")).toBeTruthy();
+		expect(screen.getByText(/cooked the budget/)).toBeTruthy();
 	});
 
 	it("renders table results, empty states, dates, and all tier colors", () => {

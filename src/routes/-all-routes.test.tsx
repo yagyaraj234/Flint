@@ -211,6 +211,35 @@ describe("public and ingest route boundaries", () => {
 		);
 	});
 
+	test("retries rejected authenticated public reads without a token", async () => {
+		state.auth.getAccessToken.mockResolvedValue("expired-token");
+		state.api.getRoast
+			.mockRejectedValueOnce(new Error("getRoast failed: 401"))
+			.mockResolvedValueOnce({
+				...ownerRoast,
+				detailed_report: {
+					summary: "Public report.",
+					actions: [],
+					generated: false,
+					model: null,
+				},
+				is_owner: false,
+				normalized: { trace_id: "trace-1", workflow: "test", spans: [] },
+				roast_line: null,
+				visibility: "public",
+			});
+
+		await expect(
+			getPublicRoast({ data: ownerRoast.slug }),
+		).resolves.toMatchObject({ slug: ownerRoast.slug });
+		expect(state.api.getRoast).toHaveBeenNthCalledWith(
+			1,
+			ownerRoast.slug,
+			"expired-token",
+		);
+		expect(state.api.getRoast).toHaveBeenNthCalledWith(2, ownerRoast.slug);
+	});
+
 	test("forwards the authenticated ingest endpoint payload to FastAPI", async () => {
 		process.env.INGEST_TOKEN = "ingest-token";
 		state.api.ingestTrace.mockResolvedValue({ slug: "live-scan" });
