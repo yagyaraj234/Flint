@@ -1,49 +1,56 @@
 """Ingest pipeline: normalize -> redact -> analyze -> score -> insert, returns slug.
 
-STUBBED until Track A lands (PLAN.md stages 1-2). The stub proves the route and
-insert path end to end but stores placeholders instead of the submitted trace:
-until redaction exists, the raw trace must never reach the database, so the
-no-secrets-in-db guarantee holds from the first commit.
+Raises ValueError when no parser can extract spans; the ingest router maps
+that to a 422. Everything stored (raw_trace included) is post-redaction —
+the database never contains a secret.
 """
 
 import secrets
 from typing import Any
 
+from app.analyze.cost import analyze_cost
+from app.analyze.roast import analyze_roast
+from app.analyze.score import score, tier
 from app.db import get_supabase
 from app.models import IngestRequest
-from app.types import CostReport, NormalizedTrace
+from app.normalize import generic, openai_agents
+from app.normalize.redact import redact_trace, redact_value
+from app.types import NormalizedTrace
 
 
 def make_slug() -> str:
     return secrets.token_urlsafe(8)[:8]
 
 
+def _parse(req: IngestRequest) -> NormalizedTrace:
+    if req.format == "openai-agents":
+        return openai_agents.parse(req.trace)
+    if req.format == "generic":
+        return generic.parse(req.trace)
+    try:
+        return openai_agents.parse(req.trace)
+    except ValueError:
+        return generic.parse(req.trace)
+
+
 def run_pipeline(req: IngestRequest) -> str:
-    # TODO(track-a swap, checkpoint T+1:15/T+2:10):
-    #   parsed = openai_agents.parse(req.trace) or generic.parse(req.trace)  (honor req.format)
-    #   redacted, hits = redact.redact(parsed)
-    #   findings = roast.analyze(redacted, hits) + cost_rules.analyze(redacted)
-    #   report = cost.report(redacted); s = score.score(findings); tier = score.tier(s)
+    trace = _parse(req)
+    redacted, hits = redact_trace(trace)
+    cost_findings, report = analyze_cost(redacted)
+    findings = [*analyze_roast(redacted, hits), *cost_findings]
+    score_value = score(findings)
+
     slug = make_slug()
     row: dict[str, Any] = {
         "slug": slug,
-        "title": req.title or "Untitled trace",
+        "title": req.title or redacted.workflow or "Untitled trace",
         "source": req.source,
-        # Placeholders, NOT req.trace — see module docstring.
-        "raw_trace": {"stub": True},
-        "normalized": NormalizedTrace(trace_id=slug, workflow=req.title or "stub", spans=[]).model_dump(),
-        "findings": [],
-        "cost": CostReport(
-            total_tokens_in=0,
-            total_tokens_out=0,
-            total_usd=0.0,
-            waste_usd=0.0,
-            token_source="estimated",
-            monthly_projection_usd=0.0,
-            projection_assumption="stub pipeline — analyzers not wired yet",
-        ).model_dump(),
-        "score": 100,
-        "tier": "Rare",
+        "raw_trace": redact_value(req.trace),
+        "normalized": redacted.model_dump(),
+        "findings": [f.model_dump() for f in findings],
+        "cost": report.model_dump(),
+        "score": score_value,
+        "tier": tier(score_value),
         "roast_line": None,
     }
     get_supabase().table("roasts").insert(row).execute()

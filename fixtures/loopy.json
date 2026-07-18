@@ -1,0 +1,110 @@
+{
+  "trace": {
+    "id": "trace-loopy",
+    "workflow_name": "Inventory lookup loop",
+    "spans": [
+      {
+        "span_id": "span-search-1",
+        "parent_id": null,
+        "start_ms": 0,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      },
+      {
+        "span_id": "span-search-2",
+        "parent_id": null,
+        "start_ms": 100,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      },
+      {
+        "span_id": "span-search-3",
+        "parent_id": null,
+        "start_ms": 200,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      },
+      {
+        "span_id": "span-search-4",
+        "parent_id": null,
+        "start_ms": 300,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      },
+      {
+        "span_id": "span-search-5",
+        "parent_id": null,
+        "start_ms": 400,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      },
+      {
+        "span_id": "span-search-6",
+        "parent_id": null,
+        "start_ms": 500,
+        "duration_ms": 80,
+        "span_data": {
+          "type": "function",
+          "name": "search_inventory",
+          "input": {
+            "sku": "ROAST-42",
+            "warehouse": "blr"
+          },
+          "output": {
+            "available": false
+          }
+        }
+      }
+    ]
+  }
+}

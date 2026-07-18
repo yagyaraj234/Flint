@@ -57,7 +57,7 @@ A checked-in example response lives at `fixtures/contract/roast-row.json` (creat
 4. Dependency lists are fixed. Backend (`api/requirements.txt`): `fastapi`, `uvicorn`, `supabase`, `pydantic`, `pydantic-settings`, `openai`, `openai-agents`, `pytest`, `httpx`. `ragas` may be added in stage 7 only. Frontend: what's already in package.json; remove `@openai/agents` and `openai` from it in stage 3 (backend owns those jobs now). Ask before adding anything else.
 5. `SUPABASE_SERVICE_ROLE_KEY` and `OPENAI_API_KEY` exist only in `api/.env`. Never logged, never returned in a response, never known to the frontend. The frontend's only env value is `API_URL`.
 6. No styling work before stage 6. An ugly card that renders beats a pretty card that doesn't exist.
-7. All database access goes through FastAPI. The Start app never imports a Supabase client. One data path.
+7. All `roasts` data access goes through FastAPI. Exception: the frontend may use Supabase directly for **auth and file storage only**, with the publishable key only — never the `sb_secret_` key, and never the `roasts` table (it has RLS enabled with no policies, so only the service role in FastAPI can reach it).
 
 ---
 

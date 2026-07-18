@@ -1,7 +1,7 @@
 # Roast0
 Agent trace roast tool. Hackathon build. Read PLAN.md, execute one stage at a time.
 
-Architecture: FastAPI backend (`api/`) owns the whole pipeline (normalize → redact → analyze → score → Supabase). TanStack Start (`src/`) is frontend only — it server-fetches from FastAPI at `API_URL`, never touches Supabase.
+Architecture: FastAPI backend (`api/`) owns the whole pipeline (normalize → redact → analyze → score → Supabase). TanStack Start (`src/`) is frontend — it server-fetches roast data from FastAPI at `API_URL`. Frontend may use Supabase directly for auth + file storage only (publishable key only, never the `roasts` table).
 
 Commands:
 - backend: `cd api && uvicorn app.main:app --reload --port 8000`, tests: `cd api && pytest`

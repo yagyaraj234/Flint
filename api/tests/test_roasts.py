@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -5,9 +8,12 @@ from tests.conftest import FakeSupabase
 
 client = TestClient(app)
 
+FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
+CLEAN_TRACE = json.loads((FIXTURES / "clean.json").read_text())
+
 
 def _ingest(title: str) -> str:
-    resp = client.post("/ingest", json={"source": "synthetic", "title": title, "trace": {}})
+    resp = client.post("/ingest", json={"source": "synthetic", "title": title, "trace": CLEAN_TRACE})
     return resp.json()["slug"]
 
 
