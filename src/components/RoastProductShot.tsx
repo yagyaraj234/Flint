@@ -9,6 +9,9 @@ const demoRoast: PublicRoast = {
 	tier: "Charcoal",
 	roastLine: "Your agent put the API key on speakerphone.",
 	createdAt: null,
+	traceId: "trace_demo",
+	visibility: "public",
+	isOwner: false,
 	findings: [
 		{
 			rule: "leaked-secret",
@@ -26,6 +29,13 @@ const demoRoast: PublicRoast = {
 		tokenSource: "measured",
 		monthlyProjectionUsd: 65100,
 		projectionAssumption: "at 1,000 runs/day",
+		unpricedModels: [],
+	},
+	detailedReport: {
+		summary: "A credential reached a tool call.",
+		actions: [],
+		generated: false,
+		model: null,
 	},
 	timeline: [],
 };

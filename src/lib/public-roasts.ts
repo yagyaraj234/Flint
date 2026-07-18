@@ -14,6 +14,7 @@ export interface LiveWallData {
 
 export type PublicFindingCategory = "security" | "reliability" | "cost";
 export type PublicTokenSource = "measured" | "estimated" | "mixed";
+export type PublicVisibility = "public" | "private";
 
 export interface PublicFinding {
 	rule: string;
@@ -31,6 +32,7 @@ export interface PublicCostReport {
 	tokenSource: PublicTokenSource;
 	monthlyProjectionUsd: number;
 	projectionAssumption: string;
+	unpricedModels: string[];
 }
 
 export interface PublicReportAction {
@@ -60,6 +62,9 @@ export interface PublicSpan {
 
 export interface PublicRoast extends PublicRoastSummary {
 	source: string;
+	traceId: string;
+	visibility: PublicVisibility;
+	isOwner: boolean;
 	findings: PublicFinding[];
 	cost: PublicCostReport;
 	detailedReport: PublicDetailedReport;
@@ -123,6 +128,11 @@ function parseCost(value: unknown): PublicCostReport {
 			typeof cost.projection_assumption === "string"
 				? cost.projection_assumption
 				: "projection unavailable",
+		unpricedModels: Array.isArray(cost.unpriced_models)
+			? cost.unpriced_models.filter(
+					(model): model is string => typeof model === "string",
+				)
+			: [],
 	};
 }
 
@@ -228,10 +238,17 @@ export function toPublicRoast(value: unknown): PublicRoast | null {
 	const summary = toPublicRoastSummary(value);
 	if (!summary || !isRecord(value) || typeof value.source !== "string")
 		return null;
+	const normalized = isRecord(value.normalized) ? value.normalized : {};
 
 	return {
 		...summary,
 		source: value.source,
+		traceId:
+			typeof normalized.trace_id === "string"
+				? normalized.trace_id
+				: summary.slug,
+		visibility: value.visibility === "private" ? "private" : "public",
+		isOwner: value.is_owner === true,
 		findings: Array.isArray(value.findings)
 			? value.findings.flatMap((finding) => {
 					const parsed = parseFinding(finding);

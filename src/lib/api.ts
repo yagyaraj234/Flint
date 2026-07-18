@@ -80,6 +80,8 @@ export interface PublicRoastRow {
 	slug: string;
 	title: string;
 	source: Source;
+	visibility: "public" | "private";
+	is_owner: boolean;
 	normalized: NormalizedTrace;
 	findings: Finding[];
 	cost: CostReport;
@@ -169,8 +171,16 @@ export async function ingestBatch(
 	};
 }
 
-export async function getRoast(slug: string): Promise<PublicRoastRow | null> {
-	const res = await fetch(`${API_URL}/roasts/${encodeURIComponent(slug)}`);
+export async function getRoast(
+	slug: string,
+	accessToken?: string,
+): Promise<PublicRoastRow | null> {
+	const url = `${API_URL}/roasts/${encodeURIComponent(slug)}`;
+	const res = accessToken
+		? await fetch(url, {
+				headers: { authorization: `Bearer ${accessToken}` },
+			})
+		: await fetch(url);
 	if (res.status === 404) return null;
 	if (!res.ok) throw new Error(`getRoast failed: ${res.status}`);
 	return (await res.json()) as PublicRoastRow;

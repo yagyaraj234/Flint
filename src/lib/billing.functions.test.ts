@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const state = vi.hoisted(() => ({
+const state = {
 	requireAccessToken: vi.fn(),
 	requireAuthenticatedUser: vi.fn(),
-}));
+};
 
 vi.mock("@tanstack/react-start", () => ({
 	createServerFn: ({ method = "GET" }: { method?: string } = {}) => ({
@@ -19,15 +19,16 @@ const { createBillingCheckout, getBillingStatus } = await import(
 	"./billing.functions"
 );
 const fetchMock = vi.fn();
+const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
 	state.requireAuthenticatedUser.mockResolvedValue({ id: "user-1" });
 	state.requireAccessToken.mockResolvedValue("access-token");
-	vi.stubGlobal("fetch", fetchMock);
+	globalThis.fetch = fetchMock as typeof fetch;
 });
 
 afterEach(() => {
-	vi.unstubAllGlobals();
+	globalThis.fetch = originalFetch;
 	fetchMock.mockReset();
 	state.requireAccessToken.mockReset();
 	state.requireAuthenticatedUser.mockReset();

@@ -43,6 +43,8 @@ describe("public roasts", () => {
 			score: 12,
 			tier: "Charcoal",
 			roast_line: "This agent put its secrets on speakerphone.",
+			visibility: "private",
+			is_owner: true,
 			findings: [
 				{
 					rule: "leaked-secret",
@@ -59,6 +61,7 @@ describe("public roasts", () => {
 				token_source: "measured",
 				monthly_projection_usd: 15000,
 				projection_assumption: "at 1,000 runs/day",
+				unpriced_models: ["custom-model"],
 			},
 			detailed_report: {
 				summary: "A leaked key reached a tool call.",
@@ -75,6 +78,7 @@ describe("public roasts", () => {
 				model: "gpt-5.6-luna",
 			},
 			normalized: {
+				trace_id: "trace-123",
 				spans: [
 					{
 						id: "tool-1",
@@ -101,6 +105,12 @@ describe("public roasts", () => {
 				durationMs: 42,
 			},
 		]);
+		expect(roast).toMatchObject({
+			traceId: "trace-123",
+			visibility: "private",
+			isOwner: true,
+			cost: { unpricedModels: ["custom-model"] },
+		});
 		expect(roast.detailedReport).toMatchObject({
 			generated: true,
 			model: "gpt-5.6-luna",
@@ -140,6 +150,9 @@ describe("public roasts", () => {
 
 		expect(roast).toMatchObject({
 			score: 100,
+			traceId: "safe-defaults",
+			visibility: "public",
+			isOwner: false,
 			roastLine: null,
 			createdAt: null,
 			findings: [
@@ -159,6 +172,7 @@ describe("public roasts", () => {
 				tokenSource: "estimated",
 				monthlyProjectionUsd: 0,
 				projectionAssumption: "projection unavailable",
+				unpricedModels: [],
 			},
 			timeline: [
 				{

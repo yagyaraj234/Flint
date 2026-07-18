@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
 import { Logo } from "../../components/Logo";
-import { RoastCard } from "../../components/RoastCard";
+import { ReportView } from "../../components/ReportView";
 import { publicRoastMeta } from "../../lib/public-roasts";
 import { getPublicRoast } from "../../lib/public-roasts.functions";
 
@@ -52,7 +52,7 @@ function PublicRoastPage() {
 		<div className="public-page">
 			<PublicTopbar />
 			<main className="public-page__main">
-				<RoastCard roast={roast} />
+				<ReportView roast={roast} />
 				<p className="public-page__stamp">
 					Flint · security scanning for AI agent traces
 				</p>
