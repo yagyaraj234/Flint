@@ -351,9 +351,12 @@ describe("static, SEO, and router routes", () => {
 		});
 		expect(await screen.findByText("leaky")).toBeTruthy();
 		expect(screen.getByText("4")).toBeTruthy();
-		expect(
-			document.querySelector('.app-sidebar__nav a[href="/app/profile"]'),
-		).toBeTruthy();
+		const profileLink = document.querySelector<HTMLAnchorElement>(
+			'.app-sidebar__nav a[href="/app/profile"]',
+		);
+		if (!profileLink) throw new Error("Missing sidebar Profile link");
+		expect(profileLink.getAttribute("href")).toBe("/app/profile");
+		expect(profileLink.tabIndex).toBe(0);
 		cleanup();
 
 		outletChild = <div>Nested route</div>;
@@ -844,6 +847,31 @@ describe("authenticated app routes", () => {
 		expect(screen.getByText("user@example.com")).toBeTruthy();
 	});
 
+	it("uses the shared page header for authenticated route hierarchy", () => {
+		render(component(profileModule.Route));
+		expect(screen.getByRole("heading", { name: "Profile" })).toBeTruthy();
+		expect(document.querySelector(".app-page__breadcrumb")?.textContent).toBe(
+			"Roast0 / Profile",
+		);
+		cleanup();
+
+		render(component(newModule.Route));
+		expect(
+			screen.getByRole("heading", { name: "Roast new traces" }),
+		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"Single object, array, or JSONL. Maximum 20 traces per upload.",
+			),
+		).toBeTruthy();
+		expect(document.querySelector(".app-page__title-row")).toBeTruthy();
+		cleanup();
+
+		render(component(dashboardModule.Route));
+		expect(screen.getByRole("link", { name: "New roast" })).toBeTruthy();
+		expect(document.querySelector(".app-page__title-row > a")).toBeTruthy();
+	});
+
 	it("reports sign-out errors, exceptions, pending state, and success", async () => {
 		auth.signOut.mockResolvedValueOnce({
 			error: { message: "Session expired" },
@@ -910,6 +938,7 @@ describe("authenticated app routes", () => {
 		resetDb();
 
 		fireEvent.click(screen.getByRole("tab", { name: "Upload file" }));
+		expect(screen.getByRole("button", { name: "Roast traces" })).toBeTruthy();
 		const fileInput = document.querySelector(
 			'input[type="file"]',
 		) as HTMLInputElement;

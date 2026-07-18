@@ -1,5 +1,6 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
+import { AppPageHeader } from "#/components/app-page-header";
 import { useAppSearch } from "#/components/app-shell";
 import { RoastTable } from "#/components/roast-table";
 
@@ -13,13 +14,11 @@ function Roasts() {
 
 	return (
 		<main className="app-page">
-			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-				Dashboard / Roasts
-			</p>
-			<h1 className="mt-2 text-3xl font-semibold tracking-tight">All roasts</h1>
-			<p className="mt-1 text-sm text-stone-500">
-				Search by title from the top bar.
-			</p>
+			<AppPageHeader
+				breadcrumb="Dashboard / Roasts"
+				description="Search by title from the top bar."
+				title="All roasts"
+			/>
 			<div className="mt-7">
 				<RoastTable roasts={roasts} query={query} />
 			</div>

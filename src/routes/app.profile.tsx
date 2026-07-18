@@ -1,5 +1,6 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 
+import { AppPageHeader } from "#/components/app-page-header";
 import { SignOutButton } from "#/components/sign-out-button";
 
 const appRoute = getRouteApi("/app");
@@ -14,10 +15,7 @@ function ProfilePage() {
 
 	return (
 		<div className="app-page">
-			<header className="app-page__header">
-				<p>Roast0 / Profile</p>
-				<h1>Profile</h1>
-			</header>
+			<AppPageHeader breadcrumb="Roast0 / Profile" title="Profile" />
 			<section className="max-w-xl rounded-xl border border-stone-200 bg-white p-6">
 				<div className="flex items-center gap-4">
 					<span aria-hidden="true" className="avatar">

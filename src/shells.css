@@ -214,8 +214,7 @@ input {
 	padding: clamp(24px, 4vw, 40px);
 }
 
-.eyebrow,
-.app-page__header p {
+.eyebrow {
 	margin: 0 0 10px;
 	color: var(--muted);
 	font-family: var(--font-mono);
@@ -224,8 +223,7 @@ input {
 	text-transform: uppercase;
 }
 
-.auth-card__content h1,
-.app-page__header h1 {
+.auth-card__content h1 {
 	margin: 0;
 	font-family: var(--font-display);
 	font-size: clamp(38px, 5vw, 54px);
@@ -277,6 +275,9 @@ input {
 	color: var(--muted);
 	font-size: 14px;
 	font-weight: 500;
+	transition:
+		background 160ms ease,
+		color 160ms ease;
 }
 
 .app-sidebar__nav a.is-active {
@@ -339,6 +340,9 @@ input {
 	color: var(--cream);
 	font-family: var(--font-mono);
 	font-size: 12px;
+	transition:
+		transform 160ms var(--ease-out),
+		box-shadow 160ms ease;
 }
 
 .app-column {
@@ -373,11 +377,42 @@ input {
 	outline: none;
 	background: var(--app-bg);
 	color: var(--text);
+	transition:
+		border-color 160ms ease,
+		box-shadow 160ms ease;
 }
 
-.search-field input:focus {
+.app-sidebar__nav a:focus-visible,
+.avatar:focus-visible,
+.search-field input:focus-visible {
+	outline: 2px solid var(--ember);
+	outline-offset: 2px;
+}
+
+.search-field input:focus-visible {
 	border-color: var(--ember-soft);
 	box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.1);
+}
+
+.avatar:active {
+	transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.app-sidebar__nav a:not(.is-active):hover {
+		background: #f5f5f4;
+		color: var(--text);
+	}
+
+	.avatar:hover {
+		box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.16);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.avatar:active {
+		transform: none;
+	}
 }
 
 .app-content {
@@ -390,6 +425,35 @@ input {
 
 .app-page__header {
 	margin-bottom: 28px;
+}
+
+.app-page__breadcrumb {
+	margin: 0 0 8px;
+	color: var(--muted);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.app-page__title-row {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.app-page__title-row h1 {
+	margin: 0;
+	font-size: 30px;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+}
+
+.app-page__description {
+	margin: 4px 0 0;
+	color: var(--muted);
+	font-size: 14px;
 }
 
 .app-page__placeholder {
@@ -489,6 +553,17 @@ input {
 
 	.app-content {
 		padding: 28px 16px 48px;
+	}
+
+	.app-page__title-row {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.app-page__title-row > a,
+	.app-page__title-row > button {
+		width: 100%;
+		justify-content: center;
 	}
 
 	.app-page__placeholder {

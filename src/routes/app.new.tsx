@@ -3,6 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { FileJson, Upload } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
+import { AppPageHeader } from "#/components/app-page-header";
+
 const createUpload = createServerFn({ method: "POST" })
 	.validator((value: unknown) => {
 		const input =
@@ -68,15 +70,11 @@ function NewRoast() {
 
 	return (
 		<main className="app-page">
-			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-				Dashboard / New roast
-			</p>
-			<h1 className="mt-2 text-3xl font-semibold tracking-tight">
-				Roast new traces
-			</h1>
-			<p className="mt-1 text-sm text-stone-500">
-				Single object, array, or JSONL. Maximum 20 traces per upload.
-			</p>
+			<AppPageHeader
+				breadcrumb="Dashboard / New roast"
+				description="Single object, array, or JSONL. Maximum 20 traces per upload."
+				title="Roast new traces"
+			/>
 
 			<form
 				onSubmit={submit}
@@ -153,14 +151,14 @@ function NewRoast() {
 						{error}
 					</p>
 				)}
-				<div className="mt-5 flex items-center justify-between gap-4">
+				<div className="mt-5 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<p className="text-xs text-stone-500">
 						Secrets are redacted before any row is stored.
 					</p>
 					<button
 						type="submit"
 						disabled={submitting}
-						className="inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-wait disabled:opacity-60"
+						className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-orange-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
 					>
 						<FileJson size={16} aria-hidden="true" />
 						{submitting ? "Staging…" : "Roast traces"}

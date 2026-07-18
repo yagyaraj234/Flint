@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { AppPageHeader } from "#/components/app-page-header";
 import { TierChip } from "#/components/roast-table";
 import type { BatchRoast } from "#/lib/roasts";
 
@@ -96,17 +97,15 @@ function BatchStatus() {
 
 	return (
 		<main className="app-page">
-			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-				Dashboard / Batch
-			</p>
-			<h1 className="mt-2 text-3xl font-semibold tracking-tight">
-				Roast status
-			</h1>
-			<p className="mt-1 text-sm text-stone-500">
-				{settled
-					? "All traces settled. Polling stopped."
-					: "Processing traces. Status refreshes every 1.5 seconds."}
-			</p>
+			<AppPageHeader
+				breadcrumb="Dashboard / Batch"
+				description={
+					settled
+						? "All traces settled. Polling stopped."
+						: "Processing traces. Status refreshes every 1.5 seconds."
+				}
+				title="Roast status"
+			/>
 
 			{error && (
 				<p

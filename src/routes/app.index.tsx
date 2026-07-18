@@ -1,4 +1,6 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+
+import { AppPageHeader } from "#/components/app-page-header";
 import { useAppSearch } from "#/components/app-shell";
 import { RoastTable } from "#/components/roast-table";
 
@@ -12,23 +14,19 @@ function Dashboard() {
 
 	return (
 		<main className="app-page">
-			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-				Dashboard / Overview
-			</p>
-			<div className="mt-2 flex items-end justify-between gap-4">
-				<div>
-					<h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-					<p className="mt-1 text-sm text-stone-500">
-						Real traces, findings, and cost waste.
-					</p>
-				</div>
-				<a
-					href="/app/new"
-					className="rounded-full bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
-				>
-					New roast
-				</a>
-			</div>
+			<AppPageHeader
+				action={
+					<a
+						href="/app/new"
+						className="inline-flex items-center justify-center rounded-full bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+					>
+						New roast
+					</a>
+				}
+				breadcrumb="Dashboard / Overview"
+				description="Real traces, findings, and cost waste."
+				title="Dashboard"
+			/>
 
 			<section
 				className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
