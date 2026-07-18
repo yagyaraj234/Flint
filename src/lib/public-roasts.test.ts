@@ -60,6 +60,20 @@ describe("public roasts", () => {
 				monthly_projection_usd: 15000,
 				projection_assumption: "at 1,000 runs/day",
 			},
+			detailed_report: {
+				summary: "A leaked key reached a tool call.",
+				actions: [
+					{
+						rule: "leaked-secret",
+						issue: "Secret reached tool arguments.",
+						impact: "Credential exposure.",
+						fix: "Rotate the key.",
+						verification: "Rerun the scan.",
+					},
+				],
+				generated: true,
+				model: "gpt-5.6-luna",
+			},
 			normalized: {
 				spans: [
 					{
@@ -87,6 +101,11 @@ describe("public roasts", () => {
 				durationMs: 42,
 			},
 		]);
+		expect(roast.detailedReport).toMatchObject({
+			generated: true,
+			model: "gpt-5.6-luna",
+			actions: [{ fix: "Rotate the key." }],
+		});
 		expect(formatShareText(roast, "https://roast0.dev/r/hot-one")).toContain(
 			"12/100 · Charcoal · $0.50 waste found",
 		);

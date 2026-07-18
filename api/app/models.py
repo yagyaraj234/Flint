@@ -31,6 +31,21 @@ class IngestResponse(BaseModel):
     slug: str
 
 
+class ReportAction(BaseModel):
+    rule: str
+    issue: str
+    impact: str
+    fix: str
+    verification: str
+
+
+class DetailedReport(BaseModel):
+    summary: str = "Detailed assessment is unavailable for this report."
+    actions: list[ReportAction] = Field(default_factory=list)
+    generated: bool = False
+    model: str | None = None
+
+
 class BatchIngestResult(BaseModel):
     slug: str
     status: Literal["done", "failed"]
@@ -51,6 +66,7 @@ class RoastRow(BaseModel):
     normalized: NormalizedTrace
     findings: list[Finding]
     cost: CostReport
+    detailed_report: DetailedReport
     score: int
     tier: str
     roast_line: str | None = None
@@ -81,6 +97,7 @@ class PublicRoast(BaseModel):
     status: RoastStatus
     findings: list[Finding]
     cost: CostReport
+    detailed_report: DetailedReport
     normalized: NormalizedTrace
     created_at: str
 
@@ -94,6 +111,7 @@ class OwnerRoast(BaseModel):
     tier: str
     findings: list[Finding]
     cost: CostReport
+    detailed_report: DetailedReport
     status: RoastStatus
     error: str | None = None
     created_at: str

@@ -77,7 +77,6 @@ def fake_db(monkeypatch: pytest.MonkeyPatch) -> FakeSupabase:
     monkeypatch.setattr("app.auth.get_supabase", lambda: fake)
     monkeypatch.setattr("app.routers.roasts.get_supabase", lambda: fake)
     monkeypatch.setattr("app.routers.me.get_supabase", lambda: fake)
-    monkeypatch.setattr("app.roast_line.get_supabase", lambda: fake)
-    # never call OpenAI from tests; the fallback line path is what's under test
-    monkeypatch.setattr("app.roast_line.generate_roast_line", lambda *args: None)
+    # never call OpenAI from tests; Luna failures must fall back cleanly.
+    monkeypatch.setattr("app.pipeline.generate_luna_assessment", lambda *args: None)
     return fake

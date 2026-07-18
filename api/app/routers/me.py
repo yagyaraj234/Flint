@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.auth import required_user_id
 from app.db import get_supabase
-from app.models import OwnerRoast
+from app.models import DetailedReport, OwnerRoast
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -28,6 +28,7 @@ def owner_roasts(
             tier=row["tier"],
             findings=row["findings"],
             cost=row["cost"],
+            detailed_report=DetailedReport.model_validate(row.get("detailed_report") or {}),
             status=row["status"],
             error=row.get("error"),
             created_at=row["created_at"],

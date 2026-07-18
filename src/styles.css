@@ -708,6 +708,7 @@ textarea {
 }
 
 .public-findings,
+.public-assessment,
 .public-cost {
 	padding: 38px 0;
 	border-top: 1px solid rgba(255, 255, 255, 0.11);
@@ -1043,6 +1044,7 @@ textarea {
 }
 
 .public-page .public-card__topline,
+.public-page .public-assessment,
 .public-page .public-findings,
 .public-page .public-fixes,
 .public-page .public-cost,
@@ -1115,6 +1117,14 @@ textarea {
 .public-page .public-verdict__copy h1,
 .public-page .public-verdict__copy h2 {
 	color: #9f3b14;
+}
+
+.public-page .public-assessment > p {
+	max-width: 780px;
+	margin: 0;
+	color: #493d36;
+	font-size: 17px;
+	line-height: 1.65;
 }
 
 .public-page .public-findings li {
@@ -1908,6 +1918,7 @@ button:focus-visible,
 	}
 
 	.public-findings,
+	.public-assessment,
 	.public-fixes,
 	.public-cost {
 		padding: 28px 0;

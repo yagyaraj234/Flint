@@ -36,6 +36,7 @@ def test_fixture_roundtrip_public_and_owner(fake_db: FakeSupabase) -> None:
     assert body["tier"] == "Charcoal"
     assert "leaked-secret" in {f["rule"] for f in body["findings"]}
     assert "unpriced_models" in body["cost"]
+    assert body["detailed_report"]["generated"] is False
 
     recent = client.get("/roasts/recent")
     assert recent.status_code == 200

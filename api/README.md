@@ -7,7 +7,7 @@ and stage plan.
 
 ## Endpoints
 
-- `POST /ingest` — `{source, title?, format?, trace}` → `{slug}` (pipeline is STUBBED until stages 1–2 land; stores placeholders, never the raw trace)
+- `POST /ingest` — `{source, title?, format?, trace}` → `{slug}`. Runs normalize → redact → deterministic checks → Luna assessment → Supabase.
 - `GET /roasts/recent` — 10 newest `{slug, title, score, tier, created_at}`
 - `GET /roasts/{slug}` — full row, 404 if missing
 - `GET /health`
@@ -31,3 +31,6 @@ pytest
 ```
 
 Tests use a fake in-memory Supabase (tests/conftest.py), no network needed.
+
+`OPENAI_API_KEY` is required for the `gpt-5.6-luna` detailed assessment. Without
+it, ingest still stores a deterministic fallback report.

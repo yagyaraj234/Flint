@@ -33,6 +33,21 @@ export interface PublicCostReport {
 	projectionAssumption: string;
 }
 
+export interface PublicReportAction {
+	rule: string;
+	issue: string;
+	impact: string;
+	fix: string;
+	verification: string;
+}
+
+export interface PublicDetailedReport {
+	summary: string;
+	actions: PublicReportAction[];
+	generated: boolean;
+	model: string | null;
+}
+
 export interface PublicSpan {
 	id: string;
 	type: string;
@@ -47,6 +62,7 @@ export interface PublicRoast extends PublicRoastSummary {
 	source: string;
 	findings: PublicFinding[];
 	cost: PublicCostReport;
+	detailedReport: PublicDetailedReport;
 	timeline: PublicSpan[];
 }
 
@@ -107,6 +123,40 @@ function parseCost(value: unknown): PublicCostReport {
 			typeof cost.projection_assumption === "string"
 				? cost.projection_assumption
 				: "projection unavailable",
+	};
+}
+
+function parseDetailedReport(value: unknown): PublicDetailedReport {
+	const report = isRecord(value) ? value : {};
+	const actions = Array.isArray(report.actions) ? report.actions : [];
+	return {
+		summary:
+			typeof report.summary === "string"
+				? report.summary
+				: "Detailed assessment is unavailable for this older report.",
+		actions: actions.flatMap((action) => {
+			if (!isRecord(action)) return [];
+			const fields = [
+				"rule",
+				"issue",
+				"impact",
+				"fix",
+				"verification",
+			] as const;
+			if (!fields.every((field) => typeof action[field] === "string"))
+				return [];
+			return [
+				{
+					rule: action.rule as string,
+					issue: action.issue as string,
+					impact: action.impact as string,
+					fix: action.fix as string,
+					verification: action.verification as string,
+				},
+			];
+		}),
+		generated: report.generated === true,
+		model: typeof report.model === "string" ? report.model : null,
 	};
 }
 
@@ -189,6 +239,7 @@ export function toPublicRoast(value: unknown): PublicRoast | null {
 				})
 			: [],
 		cost: parseCost(value.cost),
+		detailedReport: parseDetailedReport(value.detailed_report),
 		timeline: parseTimeline(value.normalized),
 	};
 }

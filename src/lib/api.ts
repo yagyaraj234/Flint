@@ -53,6 +53,21 @@ export interface CostReport {
 	unpriced_models: string[];
 }
 
+export interface ReportAction {
+	rule: string;
+	issue: string;
+	impact: string;
+	fix: string;
+	verification: string;
+}
+
+export interface DetailedReport {
+	summary: string;
+	actions: ReportAction[];
+	generated: boolean;
+	model: string | null;
+}
+
 export type RoastStatus = "processing" | "done" | "failed";
 
 export interface PublicRoastRow {
@@ -62,6 +77,7 @@ export interface PublicRoastRow {
 	normalized: NormalizedTrace;
 	findings: Finding[];
 	cost: CostReport;
+	detailed_report: DetailedReport;
 	score: number;
 	tier: Tier;
 	roast_line: string | null;
@@ -88,6 +104,7 @@ export interface OwnerRoastRow {
 	tier: Tier;
 	findings: Finding[];
 	cost: CostReport;
+	detailed_report: DetailedReport;
 	status: RoastStatus;
 	error: string | null;
 	created_at: string;

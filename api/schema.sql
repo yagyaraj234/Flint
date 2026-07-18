@@ -10,6 +10,7 @@ create table if not exists public.roasts (
   normalized jsonb not null,
   findings jsonb not null,
   cost jsonb not null,
+  detailed_report jsonb not null default '{}'::jsonb,
   score int not null,
   tier text not null,
   roast_line text,
@@ -25,7 +26,8 @@ alter table public.roasts
   add column if not exists status text not null default 'done',
   add column if not exists error text,
   add column if not exists user_id uuid references auth.users(id),
-  add column if not exists batch_id uuid;
+  add column if not exists batch_id uuid,
+  add column if not exists detailed_report jsonb not null default '{}'::jsonb;
 
 update public.roasts set status = 'done' where status is null;
 update public.roasts set created_at = now() where created_at is null;

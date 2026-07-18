@@ -25,7 +25,16 @@ def test_get_roast_roundtrip(fake_db: FakeSupabase) -> None:
     assert body["slug"] == slug
     assert body["title"] == "roundtrip"
     # contract shape (snake_case) — the UI builds against these keys
-    for key in ("normalized", "findings", "cost", "score", "tier", "roast_line", "created_at"):
+    for key in (
+        "normalized",
+        "findings",
+        "cost",
+        "detailed_report",
+        "score",
+        "tier",
+        "roast_line",
+        "created_at",
+    ):
         assert key in body
     assert not {"raw_trace", "user_id", "batch_id", "error", "id"} & body.keys()
 

@@ -100,6 +100,20 @@ const roast: PublicRoast = {
 		monthlyProjectionUsd: 12000,
 		projectionAssumption: "at 1,000 runs/day",
 	},
+	detailedReport: {
+		summary: "A secret reached a tool and the trace repeated paid work.",
+		actions: [
+			{
+				rule: "leaked-secret",
+				issue: "Secret reached tool arguments.",
+				impact: "Security: exposed credentials can be abused.",
+				fix: "Rotate the credential and pass a reference instead.",
+				verification: "Rerun the trace and confirm no secret finding.",
+			},
+		],
+		generated: true,
+		model: "gpt-5.6-luna",
+	},
 	timeline: [
 		{
 			id: "one",
@@ -165,7 +179,10 @@ describe("presentational components", () => {
 		expect(screen.getByText("15 tok · 1.5s")).toBeTruthy();
 		expect(screen.getByText("$12000")).toBeTruthy();
 		expect(screen.getByRole("heading", { name: "Fix plan" })).toBeTruthy();
-		expect(screen.getByText("Rotate exposed credentials")).toBeTruthy();
+		expect(screen.getByText("Detailed assessment")).toBeTruthy();
+		expect(
+			screen.getByText("Rotate the credential and pass a reference instead."),
+		).toBeTruthy();
 
 		rerender(
 			<RoastCard

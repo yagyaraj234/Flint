@@ -22,7 +22,7 @@ from app.models import (
 )
 from app.normalize import generic, openai_agents
 from app.normalize.redact import redact_trace, redact_value
-from app.roast_line import fallback_line
+from app.roast_line import fallback_detailed_report, fallback_line, generate_luna_assessment
 from app.types import CostReport, NormalizedTrace
 
 
@@ -41,6 +41,17 @@ def _parse(req: IngestRequest) -> NormalizedTrace:
         return generic.parse(req.trace)
 
 
+def _insert_row(row: dict[str, Any]) -> None:
+    """Keep ingest live until the detailed-report migration has been applied."""
+    try:
+        get_supabase().table("roasts").insert(row).execute()
+    except Exception as exc:
+        if "detailed_report" not in str(exc):
+            raise
+        legacy_row = {key: value for key, value in row.items() if key != "detailed_report"}
+        get_supabase().table("roasts").insert(legacy_row).execute()
+
+
 def run_pipeline(
     req: IngestRequest,
     user_id: str | None = None,
@@ -52,6 +63,11 @@ def run_pipeline(
     cost_findings, report = analyze_cost(redacted)
     findings = [*analyze_roast(redacted, hits), *cost_findings]
     score_value = score(findings)
+    tier_value = tier(score_value)
+    luna = generate_luna_assessment(findings, report, redacted, score_value, tier_value)
+    roast_line, detailed_report = (
+        luna if luna is not None else (fallback_line(tier_value), fallback_detailed_report(findings, report))
+    )
 
     slug = make_slug()
     row: dict[str, Any] = {
@@ -63,15 +79,15 @@ def run_pipeline(
         "findings": [f.model_dump() for f in findings],
         "cost": report.model_dump(),
         "score": score_value,
-        "tier": tier(score_value),
-        # per-tier fallback; the post-insert background task swaps in the LLM line
-        "roast_line": fallback_line(tier(score_value)),
+        "tier": tier_value,
+        "roast_line": roast_line,
+        "detailed_report": detailed_report.model_dump(),
         # pipeline is synchronous: a stored row is by definition done
         "status": "done",
         "user_id": user_id,
         "batch_id": batch_id,
     }
-    get_supabase().table("roasts").insert(row).execute()
+    _insert_row(row)
     return slug
 
 
@@ -96,7 +112,7 @@ def _failed_batch_row(
         projection_assumption="at 1,000 runs/day",
         unpriced_models=[],
     )
-    get_supabase().table("roasts").insert(
+    _insert_row(
         {
             "slug": slug,
             "title": title,
@@ -105,6 +121,7 @@ def _failed_batch_row(
             "normalized": empty_trace.model_dump(),
             "findings": [],
             "cost": empty_cost.model_dump(),
+            "detailed_report": fallback_detailed_report([], empty_cost).model_dump(),
             "score": 0,
             "tier": "Unknown",
             "roast_line": None,
@@ -113,7 +130,7 @@ def _failed_batch_row(
             "user_id": user_id,
             "batch_id": batch_id,
         }
-    ).execute()
+    )
     return BatchIngestResult(slug=slug, status="failed", error=message)
 
 

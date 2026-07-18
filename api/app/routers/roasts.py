@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.db import get_supabase
-from app.models import PublicRoast, RecentRoast
+from app.models import DetailedReport, PublicRoast, RecentRoast
 
 router = APIRouter(prefix="/roasts", tags=["roasts"])
 
@@ -45,6 +45,7 @@ def get_roast(slug: str) -> PublicRoast:
         status=row["status"],
         findings=row["findings"],
         cost=row["cost"],
+        detailed_report=DetailedReport.model_validate(row.get("detailed_report") or {}),
         normalized=row["normalized"],
         created_at=row["created_at"],
     )

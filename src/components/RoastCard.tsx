@@ -9,6 +9,13 @@ type FindingGroup = {
 	finding: PublicRoast["findings"][number];
 	key: string;
 };
+type FixPlanItem = {
+	count: number;
+	detail: string;
+	impact: string;
+	key: string;
+	title: string;
+};
 
 function money(value: number): string {
 	return `$${value.toFixed(value < 10 ? 2 : 0)}`;
@@ -157,14 +164,21 @@ export function RoastCard({
 		},
 		{ critical: 0, warning: 0, notice: 0 },
 	);
-	const fixes = preview
+	const fixes: FixPlanItem[] = preview
 		? []
-		: findingGroups.slice(0, 4).map(({ count, finding, key }) => ({
-				count,
-				...fixForFinding(finding),
-				finding,
-				key,
-			}));
+		: roast.detailedReport.actions.length > 0
+			? roast.detailedReport.actions.slice(0, 4).map((action) => ({
+					count: 1,
+					detail: action.issue,
+					impact: `${action.impact} Verify: ${action.verification}`,
+					key: `assessment-${action.rule}`,
+					title: action.fix,
+				}))
+			: findingGroups.slice(0, 4).map(({ count, finding, key }) => ({
+					count,
+					...fixForFinding(finding),
+					key,
+				}));
 	const scoreStyle: ScoreStyle = {
 		"--score-target": `${roast.score * 3.6}deg`,
 	};
@@ -205,6 +219,23 @@ export function RoastCard({
 					{!preview && <ShareButtons roast={roast} />}
 				</div>
 			</div>
+
+			{!preview && (
+				<section
+					className="public-assessment"
+					aria-labelledby="assessment-heading"
+				>
+					<div className="card-section-heading">
+						<h2 id="assessment-heading">Detailed assessment</h2>
+						<span>
+							{roast.detailedReport.generated
+								? (roast.detailedReport.model ?? "Luna")
+								: "rule-based fallback"}
+						</span>
+					</div>
+					<p>{roast.detailedReport.summary}</p>
+				</section>
+			)}
 
 			<section
 				className="public-findings"
