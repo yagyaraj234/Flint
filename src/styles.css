@@ -3141,6 +3141,7 @@ button:focus-visible,
 	.public-topbar,
 	.public-page__stamp,
 	.report-share__trigger,
+	.share-actions,
 	.share-dialog {
 		display: none;
 	}

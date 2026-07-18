@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { setResponseHeader } from "@tanstack/react-start/server";
 
 import {
 	type LiveWallData,
@@ -28,12 +29,14 @@ export const getPublicRoast = createServerFn({ method: "GET" })
 	.validator((slug: string): string | null =>
 		/^[a-zA-Z0-9_-]{1,64}$/.test(slug) ? slug : null,
 	)
-	.handler(async ({ data: slug }) =>
-		getPublicRoastData(
+	.handler(async ({ data: slug }) => {
+		setResponseHeader("Cache-Control", "private, no-store");
+		setResponseHeader("Vary", "Cookie");
+		return getPublicRoastData(
 			slug,
 			slug ? await getAccessToken().catch(() => null) : null,
-		),
-	);
+		);
+	});
 
 export async function getPublicRoastData(
 	slug: string | null,

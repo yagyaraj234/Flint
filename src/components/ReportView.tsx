@@ -4,6 +4,7 @@ import {
 	type PublicFindingCategory,
 	type PublicRoast,
 } from "../lib/public-roasts";
+import { fixForFinding } from "./RoastCard";
 import { ShareButtons } from "./ShareButtons";
 import { ShareDialog } from "./ShareDialog";
 
@@ -76,6 +77,27 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 			.sort((left, right) => right.severity - left.severity);
 		return findings.length > 0 ? [{ category, findings }] : [];
 	});
+	const remediationActions =
+		roast.detailedReport.actions.length > 0
+			? roast.detailedReport.actions.map((action) => ({
+					detail: action.verification,
+					detailLabel: "Verification",
+					fix: action.fix,
+					impact: action.impact,
+					issue: action.issue,
+					rule: action.rule,
+				}))
+			: roast.findings.map((finding) => {
+					const fallback = fixForFinding(finding);
+					return {
+						detail: fallback.detail,
+						detailLabel: "Implementation",
+						fix: fallback.title,
+						impact: fallback.impact,
+						issue: finding.message,
+						rule: finding.rule,
+					};
+				});
 
 	return (
 		<article className="report-view">
@@ -152,9 +174,9 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 			>
 				<p className="mono-label">Remediation</p>
 				<h2 id="report-actions-heading">Recommended actions</h2>
-				{roast.detailedReport.actions.length > 0 ? (
+				{remediationActions.length > 0 ? (
 					<div className="report-actions">
-						{roast.detailedReport.actions.map((action) => (
+						{remediationActions.map((action) => (
 							<dl key={`${action.rule}-${action.issue}-${action.fix}`}>
 								<div>
 									<dt>Issue</dt>
@@ -169,8 +191,8 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 									<dd>{action.fix}</dd>
 								</div>
 								<div>
-									<dt>Verification</dt>
-									<dd>{action.verification}</dd>
+									<dt>{action.detailLabel}</dt>
+									<dd>{action.detail}</dd>
 								</div>
 								<code>{action.rule}</code>
 							</dl>

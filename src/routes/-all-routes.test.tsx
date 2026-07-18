@@ -14,6 +14,9 @@ const state = {
 		requireAuthenticatedUser: vi.fn(),
 	},
 	routes: new Map<string, { options: Record<string, unknown> }>(),
+	server: {
+		setResponseHeader: vi.fn(),
+	},
 };
 
 vi.mock("@tanstack/react-router", () => ({
@@ -48,6 +51,7 @@ vi.mock("@tanstack/react-start", () => ({
 
 vi.mock("#/lib/api", () => state.api);
 vi.mock("#/lib/supabase-auth.server", () => state.auth);
+vi.mock("@tanstack/react-start/server", () => state.server);
 
 const appModule = await import("./app");
 const batchModule = await import("./app.roasts.$batch");
@@ -92,6 +96,7 @@ const ownerRoast = {
 beforeEach(() => {
 	for (const fn of Object.values(state.api)) fn.mockReset();
 	for (const fn of Object.values(state.auth)) fn.mockReset();
+	for (const fn of Object.values(state.server)) fn.mockReset();
 	state.auth.requireAccessToken.mockResolvedValue("access-token");
 	state.auth.getAccessToken.mockResolvedValue(null);
 	state.auth.requireAuthenticatedUser.mockResolvedValue({ id: "user-id" });
@@ -187,6 +192,15 @@ describe("public and ingest route boundaries", () => {
 
 		expect(await getPublicRoast({ data: "bad slug" })).toBeNull();
 		expect(state.api.getRoast).not.toHaveBeenCalled();
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Cache-Control",
+			"private, no-store",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Vary",
+			"Cookie",
+		);
+		state.server.setResponseHeader.mockClear();
 
 		state.auth.getAccessToken.mockResolvedValue("access-token");
 		state.api.getRoast.mockResolvedValue({
@@ -208,6 +222,15 @@ describe("public and ingest route boundaries", () => {
 		expect(state.api.getRoast).toHaveBeenCalledWith(
 			ownerRoast.slug,
 			"access-token",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledTimes(2);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Cache-Control",
+			"private, no-store",
+		);
+		expect(state.server.setResponseHeader).toHaveBeenCalledWith(
+			"Vary",
+			"Cookie",
 		);
 	});
 

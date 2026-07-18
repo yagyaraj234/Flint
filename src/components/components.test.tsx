@@ -206,7 +206,7 @@ describe("presentational components", () => {
 	});
 
 	it("renders the professional report hierarchy and cost caveats", () => {
-		render(
+		const { rerender } = render(
 			<ReportView
 				roast={{
 					...roast,
@@ -234,6 +234,29 @@ describe("presentational components", () => {
 		expect(screen.getByText("Trace timeline")).toBeTruthy();
 		expect(screen.getByText("15 tok · 1.5s")).toBeTruthy();
 		expect(screen.getByText(/cooked the budget/)).toBeTruthy();
+
+		rerender(
+			<ReportView
+				roast={{
+					...roast,
+					detailedReport: { ...roast.detailedReport, actions: [] },
+				}}
+			/>,
+		);
+		expect(screen.getByText("Rotate exposed credentials")).toBeTruthy();
+		expect(screen.getByText(/Revoke this key/)).toBeTruthy();
+		expect(screen.queryByText("No remediation actions required.")).toBeNull();
+
+		rerender(
+			<ReportView
+				roast={{
+					...roast,
+					findings: [],
+					detailedReport: { ...roast.detailedReport, actions: [] },
+				}}
+			/>,
+		);
+		expect(screen.getByText("No remediation actions required.")).toBeTruthy();
 	});
 
 	it("renders table results, empty states, dates, and all tier colors", () => {
