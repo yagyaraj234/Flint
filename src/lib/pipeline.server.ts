@@ -24,15 +24,26 @@ export async function stageDataset(input: StageDatasetInput) {
 	const batchId = randomUUID();
 	const rows = input.traces.map((trace, index) => {
 		const slug = nanoid(8);
-		const title = traceTitle(trace, input.title, index, input.traces.length);
 		const redacted = redactTrace(trace);
+		const redactedTitle = input.title
+			? redactTrace({ title: input.title })
+			: { trace: {}, hits: [] };
+		const title = traceTitle(
+			redacted.trace,
+			string(redactedTitle.trace.title) || undefined,
+			index,
+			input.traces.length,
+		);
 		return {
 			slug,
 			title,
 			source: input.source ?? detectSource(trace),
 			raw_trace: redacted.trace,
 			normalized: { traceId: slug, workflow: title, spans: [] },
-			findings: findingsFromRedactions(redacted.hits),
+			findings: findingsFromRedactions([
+				...redacted.hits,
+				...redactedTitle.hits,
+			]),
 			cost: emptyCost(),
 			score: 0,
 			tier: "Processing",
