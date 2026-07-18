@@ -227,7 +227,7 @@ const newModule = await import("./app.new");
 const roastsLayoutModule = await import("./app.roasts");
 const roastsModule = await import("./app.roasts.index");
 const batchModule = await import("./app.roasts.$batch");
-const settingsModule = await import("./app.settings");
+const profileModule = await import("./app.profile");
 const publicModule = await import("./r/$slug");
 const apiModule = await import("./api.ingest");
 const robotsModule = await import("./robots[.]txt");
@@ -351,6 +351,9 @@ describe("static, SEO, and router routes", () => {
 		});
 		expect(await screen.findByText("leaky")).toBeTruthy();
 		expect(screen.getByText("4")).toBeTruthy();
+		expect(
+			document.querySelector('.app-sidebar__nav a[href="/app/profile"]'),
+		).toBeTruthy();
 		cleanup();
 
 		outletChild = <div>Nested route</div>;
@@ -800,7 +803,7 @@ describe("authenticated app routes", () => {
 		expect(screen.getByText("2")).toBeTruthy();
 	});
 
-	it("renders dashboard, roast list, layout, and settings", () => {
+	it("renders dashboard, roast list, layout, and profile", () => {
 		Object.assign(appLoaderData, {
 			recent: [
 				{
@@ -837,7 +840,7 @@ describe("authenticated app routes", () => {
 		render(component(roastsModule.Route));
 		expect(screen.getByText("Nothing roasted yet")).toBeTruthy();
 		cleanup();
-		render(component(settingsModule.Route));
+		render(component(profileModule.Route));
 		expect(screen.getByText("user@example.com")).toBeTruthy();
 	});
 
@@ -845,7 +848,7 @@ describe("authenticated app routes", () => {
 		auth.signOut.mockResolvedValueOnce({
 			error: { message: "Session expired" },
 		});
-		render(component(settingsModule.Route));
+		render(component(profileModule.Route));
 		fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 		expect((await screen.findByRole("alert")).textContent).toBe(
 			"Session expired",
@@ -853,7 +856,7 @@ describe("authenticated app routes", () => {
 		cleanup();
 
 		auth.signOut.mockRejectedValueOnce(new Error("network"));
-		render(component(settingsModule.Route));
+		render(component(profileModule.Route));
 		fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 		expect((await screen.findByRole("alert")).textContent).toBe(
 			"Could not sign out. Try again.",
@@ -867,7 +870,7 @@ describe("authenticated app routes", () => {
 					resolveSignOut = resolve;
 				}),
 		);
-		render(component(settingsModule.Route));
+		render(component(profileModule.Route));
 		fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 		expect(
 			(

@@ -95,7 +95,7 @@ function BatchStatus() {
 	}, [navigate, rows]);
 
 	return (
-		<main className="mx-auto max-w-4xl p-5 lg:p-8">
+		<main className="app-page">
 			<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
 				Dashboard / Batch
 			</p>

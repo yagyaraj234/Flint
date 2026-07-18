@@ -26,9 +26,11 @@ export function AuthShell({
 						<p className="eyebrow">Roast0 account</p>
 						<h1>{title}</h1>
 					</div>
-					{children ?? (
-						<div aria-hidden="true" className="auth-card__placeholder" />
-					)}
+					<div className="auth-card__body">
+						{children ?? (
+							<div aria-hidden="true" className="auth-card__placeholder" />
+						)}
+					</div>
 				</div>
 			</section>
 		</main>

@@ -1,16 +1,16 @@
 import { Link, Outlet } from "@tanstack/react-router";
+import { CirclePlus, Flame, LayoutDashboard, UserRound } from "lucide-react";
 import { createContext, useContext, useState } from "react";
 
 import { Logo } from "./brand";
-import { SignOutButton } from "./sign-out-button";
 
 const SearchContext = createContext("");
 
 const navItems = [
-	{ label: "Dashboard", to: "/app" },
-	{ label: "New roast", to: "/app/new" },
-	{ label: "Roasts", to: "/app/roasts" },
-	{ label: "Settings", to: "/app/settings" },
+	{ icon: LayoutDashboard, label: "Dashboard", to: "/app" },
+	{ icon: CirclePlus, label: "New roast", to: "/app/new" },
+	{ icon: Flame, label: "Roasts", to: "/app/roasts" },
+	{ icon: UserRound, label: "Profile", to: "/app/profile" },
 ] as const;
 
 export function useAppSearch() {
@@ -42,7 +42,10 @@ export function AppShell({
 								key={item.to}
 								to={item.to}
 							>
-								{item.label}
+								<span className="app-sidebar__nav-label">
+									<item.icon aria-hidden="true" size={16} strokeWidth={1.8} />
+									{item.label}
+								</span>
 								{item.to === "/app/roasts" ? (
 									<span className="nav-count">{totalRoasts}</span>
 								) : null}
@@ -53,15 +56,6 @@ export function AppShell({
 						<div className="ingest-status">
 							<span>Ingest</span>
 							<span className="status-pill">Idle</span>
-						</div>
-						<div className="account-row">
-							<span aria-hidden="true" className="avatar">
-								{initial}
-							</span>
-							<span className="account-email" title={user.email}>
-								{user.email}
-							</span>
-							<SignOutButton />
 						</div>
 					</div>
 				</aside>
@@ -76,9 +70,9 @@ export function AppShell({
 								value={search}
 							/>
 						</label>
-						<span aria-hidden="true" className="avatar">
+						<Link aria-label="Profile" className="avatar" to="/app/profile">
 							{initial}
-						</span>
+						</Link>
 					</header>
 					<main className="app-content">
 						<Outlet />
