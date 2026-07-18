@@ -1,45 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { FileJson, Upload } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { AppPageHeader } from "#/components/app-page-header";
+import { createUpload } from "#/lib/roast-functions";
 
-export const createUpload = createServerFn({ method: "POST" })
-	.validator((value: unknown) => {
-		const input =
-			value && typeof value === "object"
-				? (value as Record<string, unknown>)
-				: {};
-		if (typeof input.text !== "string")
-			throw new Error("Trace JSON is required.");
-		const title = typeof input.title === "string" ? input.title.trim() : "";
-		if (title.length > 120)
-			throw new Error("Title must be 120 characters or less.");
-		return { text: input.text, title };
-	})
-	.handler(({ data }) => createUploadData(data));
-
-export async function createUploadData(data: { text: string; title: string }) {
-	const [
-		{ parseTraceDataset },
-		{ ingestBatch },
-		{ requireAccessToken, requireAuthenticatedUser },
-	] = await Promise.all([
-		import("#/lib/ingest"),
-		import("#/lib/api"),
-		import("#/lib/supabase-auth.server"),
-	]);
-	await requireAuthenticatedUser();
-	const accessToken = await requireAccessToken();
-	return ingestBatch(
-		{
-			traces: parseTraceDataset(data.text),
-			title: data.title || undefined,
-		},
-		accessToken,
-	);
-}
+export { createUpload } from "#/lib/roast-functions";
 
 export const Route = createFileRoute("/app/new")({ component: NewRoast });
 

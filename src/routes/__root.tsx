@@ -3,6 +3,7 @@ import shellCss from "../shells.css?url";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
+	notFoundComponent: RootNotFound,
 	head: () => ({
 		meta: [
 			{ charSet: "utf-8" },
@@ -45,5 +46,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function RootNotFound() {
+	return (
+		<main className="root-not-found">
+			<p className="mono-label">404 · PAGE NOT FOUND</p>
+			<h1>Nothing here.</h1>
+			<a className="button" href="/">
+				Back to Flint
+			</a>
+		</main>
 	);
 }

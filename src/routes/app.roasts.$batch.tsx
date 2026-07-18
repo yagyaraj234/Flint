@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import {
 	ArrowUpRight,
 	CheckCircle2,
@@ -10,42 +9,8 @@ import { useEffect, useState } from "react";
 
 import { AppPageHeader } from "#/components/app-page-header";
 import { SeverityCounts } from "#/components/roast-table";
+import { loadBatch } from "#/lib/roast-functions";
 import type { BatchRoast } from "#/lib/roasts";
-
-const batchValidator = (value: unknown) => {
-	const input =
-		value && typeof value === "object"
-			? (value as Record<string, unknown>)
-			: {};
-	const batchId = typeof input.batchId === "string" ? input.batchId : "";
-	if (
-		!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-			batchId,
-		)
-	) {
-		throw new Error("Invalid batch id.");
-	}
-	return { batchId };
-};
-
-const loadBatch = createServerFn({ method: "GET" })
-	.validator(batchValidator)
-	.handler(({ data }) => loadBatchData(data));
-
-export async function loadBatchData(data: { batchId: string }) {
-	const [
-		{ getMyRoasts },
-		{ mapOwnerRoastToBatchRoast },
-		{ requireAccessToken, requireAuthenticatedUser },
-	] = await Promise.all([
-		import("#/lib/api"),
-		import("#/lib/roasts"),
-		import("#/lib/supabase-auth.server"),
-	]);
-	await requireAuthenticatedUser();
-	const rows = await getMyRoasts(await requireAccessToken(), data.batchId);
-	return rows.map(mapOwnerRoastToBatchRoast);
-}
 
 export const Route = createFileRoute("/app/roasts/$batch")({
 	loader: ({ params }) => loadBatch({ data: { batchId: params.batch } }),
