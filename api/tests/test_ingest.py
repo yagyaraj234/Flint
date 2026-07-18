@@ -38,7 +38,7 @@ def test_no_secret_ever_reaches_db(fake_db: FakeSupabase) -> None:
     assert "REDACTED:openai-key" in fake_db.dump()
 
 
-def test_ingest_passes_through_user_and_batch(fake_db: FakeSupabase) -> None:
+def test_ingest_uses_authenticated_user_and_ignores_body_identity(fake_db: FakeSupabase) -> None:
     resp = client.post(
         "/ingest",
         json={
@@ -47,12 +47,29 @@ def test_ingest_passes_through_user_and_batch(fake_db: FakeSupabase) -> None:
             "user_id": "11111111-1111-1111-1111-111111111111",
             "batch_id": "22222222-2222-2222-2222-222222222222",
         },
+        headers={"Authorization": "Bearer good-token-user-1"},
     )
     assert resp.status_code == 200
     row = fake_db.rows[0]
     assert row["status"] == "done"
-    assert row["user_id"] == "11111111-1111-1111-1111-111111111111"
-    assert row["batch_id"] == "22222222-2222-2222-2222-222222222222"
+    assert row["user_id"] == "user-1"
+    assert row["batch_id"] is None
+
+
+def test_ingest_without_auth_is_anonymous(fake_db: FakeSupabase) -> None:
+    resp = client.post("/ingest", json={"source": "upload", "trace": _leaked_key_trace()})
+    assert resp.status_code == 200
+    assert fake_db.rows[0]["user_id"] is None
+
+
+def test_ingest_rejects_invalid_bearer_token(fake_db: FakeSupabase) -> None:
+    resp = client.post(
+        "/ingest",
+        json={"source": "upload", "trace": _leaked_key_trace()},
+        headers={"Authorization": "Bearer bad-token"},
+    )
+    assert resp.status_code == 401
+    assert fake_db.rows == []
 
 
 def test_ingest_rejects_bad_source(fake_db: FakeSupabase) -> None:
@@ -64,3 +81,35 @@ def test_ingest_rejects_unparseable_trace(fake_db: FakeSupabase) -> None:
     resp = client.post("/ingest", json={"source": "upload", "trace": 42})
     assert resp.status_code == 422
     assert len(fake_db.rows) == 0
+
+
+def test_batch_ingest_requires_auth_and_persists_failures(fake_db: FakeSupabase) -> None:
+    payload = {
+        "source": "upload",
+        "title": "batch trace",
+        "traces": [_leaked_key_trace(), 42, _leaked_key_trace()],
+    }
+    assert client.post("/ingest/batch", json=payload).status_code == 401
+
+    resp = client.post(
+        "/ingest/batch",
+        json=payload,
+        headers={"Authorization": "Bearer good-token-user-1"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body["batch_id"]) == 36
+    assert [result["status"] for result in body["results"]] == ["done", "failed", "done"]
+    assert body["results"][1]["error"]
+    assert [row["title"] for row in fake_db.rows] == [
+        "batch trace 1",
+        "batch trace 2",
+        "batch trace 3",
+    ]
+    assert {row["batch_id"] for row in fake_db.rows} == {body["batch_id"]}
+    assert {row["user_id"] for row in fake_db.rows} == {"user-1"}
+    failed = fake_db.rows[1]
+    assert failed["status"] == "failed"
+    assert failed["score"] == 0
+    assert failed["tier"] == "Unknown"
+    assert failed["findings"] == []

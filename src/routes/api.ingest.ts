@@ -53,14 +53,18 @@ export const Route = createFileRoute("/api/ingest")({
 				}
 
 				try {
-					const [{ parseSource }, { ingestSingle }] = await Promise.all([
+					const [{ parseSource }, { ingestTrace }] = await Promise.all([
 						import("#/lib/ingest"),
-						import("#/lib/pipeline.server"),
+						import("#/lib/api"),
 					]);
-					const result = await ingestSingle({
+					const result = await ingestTrace({
 						trace: payload.trace as Record<string, unknown>,
 						title,
 						source: parseSource(payload.source, "live"),
+						format:
+							payload.format === "openai-agents" || payload.format === "generic"
+								? payload.format
+								: undefined,
 					});
 					return Response.json(result, { status: 201 });
 				} catch {

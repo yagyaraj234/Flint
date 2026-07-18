@@ -1,8 +1,9 @@
-// @ts-expect-error Bun provides this module at test runtime; Bun types are not installed.
-import { afterEach, describe, expect, it, mock } from "bun:test";
 // @ts-expect-error jsdom does not publish bundled TypeScript declarations.
 import { JSDOM, VirtualConsole } from "jsdom";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PublicRoast } from "../lib/public-roasts";
+
+const mock = vi.fn;
 
 if (typeof document === "undefined") {
 	const virtualConsole = new VirtualConsole().forwardTo(console, {

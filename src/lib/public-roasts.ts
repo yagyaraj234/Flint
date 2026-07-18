@@ -83,29 +83,29 @@ function parseFinding(value: unknown): PublicFinding | null {
 		category,
 		severity: severity >= 3 ? 3 : severity >= 2 ? 2 : 1,
 		message,
-		estWasteUsd: finiteNumber(value.estWasteUsd),
+		estWasteUsd: finiteNumber(value.est_waste_usd),
 	};
 }
 
 function parseCost(value: unknown): PublicCostReport {
 	const cost = isRecord(value) ? value : {};
-	const tokenSource = cost.tokenSource;
+	const tokenSource = cost.token_source;
 
 	return {
-		totalTokensIn: finiteNumber(cost.totalTokensIn) ?? 0,
-		totalTokensOut: finiteNumber(cost.totalTokensOut) ?? 0,
-		totalUsd: finiteNumber(cost.totalUsd) ?? 0,
-		wasteUsd: finiteNumber(cost.wasteUsd) ?? 0,
+		totalTokensIn: finiteNumber(cost.total_tokens_in) ?? 0,
+		totalTokensOut: finiteNumber(cost.total_tokens_out) ?? 0,
+		totalUsd: finiteNumber(cost.total_usd) ?? 0,
+		wasteUsd: finiteNumber(cost.waste_usd) ?? 0,
 		tokenSource:
 			tokenSource === "measured" ||
 			tokenSource === "mixed" ||
 			tokenSource === "estimated"
 				? tokenSource
 				: "estimated",
-		monthlyProjectionUsd: finiteNumber(cost.monthlyProjectionUsd) ?? 0,
+		monthlyProjectionUsd: finiteNumber(cost.monthly_projection_usd) ?? 0,
 		projectionAssumption:
-			typeof cost.projectionAssumption === "string"
-				? cost.projectionAssumption
+			typeof cost.projection_assumption === "string"
+				? cost.projection_assumption
 				: "projection unavailable",
 	};
 }
@@ -118,9 +118,9 @@ function parseSpan(value: unknown, index: number): PublicSpan | null {
 		type: typeof value.type === "string" ? value.type : "other",
 		name: value.name,
 		model: typeof value.model === "string" ? value.model : null,
-		tokensIn: finiteNumber(value.tokensIn),
-		tokensOut: finiteNumber(value.tokensOut),
-		durationMs: finiteNumber(value.durationMs),
+		tokensIn: finiteNumber(value.tokens_in),
+		tokensOut: finiteNumber(value.tokens_out),
+		durationMs: finiteNumber(value.duration_ms),
 	};
 }
 

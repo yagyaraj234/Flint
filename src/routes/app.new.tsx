@@ -5,7 +5,7 @@ import { type FormEvent, useState } from "react";
 
 import { AppPageHeader } from "#/components/app-page-header";
 
-const createUpload = createServerFn({ method: "POST" })
+export const createUpload = createServerFn({ method: "POST" })
 	.validator((value: unknown) => {
 		const input =
 			value && typeof value === "object"
@@ -18,23 +18,28 @@ const createUpload = createServerFn({ method: "POST" })
 			throw new Error("Title must be 120 characters or less.");
 		return { text: input.text, title };
 	})
-	.handler(async ({ data }) => {
-		const [
-			{ parseTraceDataset },
-			{ stageDataset },
-			{ requireAuthenticatedUser },
-		] = await Promise.all([
-			import("#/lib/ingest"),
-			import("#/lib/pipeline.server"),
-			import("#/lib/supabase-auth.server"),
-		]);
-		const user = await requireAuthenticatedUser();
-		return stageDataset({
+	.handler(({ data }) => createUploadData(data));
+
+export async function createUploadData(data: { text: string; title: string }) {
+	const [
+		{ parseTraceDataset },
+		{ ingestBatch },
+		{ requireAccessToken, requireAuthenticatedUser },
+	] = await Promise.all([
+		import("#/lib/ingest"),
+		import("#/lib/api"),
+		import("#/lib/supabase-auth.server"),
+	]);
+	await requireAuthenticatedUser();
+	const accessToken = await requireAccessToken();
+	return ingestBatch(
+		{
 			traces: parseTraceDataset(data.text),
 			title: data.title || undefined,
-			userId: user.id,
-		});
-	});
+		},
+		accessToken,
+	);
+}
 
 export const Route = createFileRoute("/app/new")({ component: NewRoast });
 
@@ -55,7 +60,7 @@ function NewRoast() {
 			const result = await createUpload({ data: { text, title } });
 			await navigate({
 				to: "/app/roasts/$batch",
-				params: { batch: result.batchId },
+				params: { batch: result.batch_id },
 			});
 		} catch (submissionError) {
 			setError(

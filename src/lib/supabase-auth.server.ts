@@ -62,3 +62,16 @@ export async function requireAuthenticatedUser() {
 	if (!user) throw new Error("Unauthorized.");
 	return user;
 }
+
+export async function getAccessToken(): Promise<string | null> {
+	const {
+		data: { session },
+	} = await getSupabaseAuthClient().auth.getSession();
+	return session?.access_token ?? null;
+}
+
+export async function requireAccessToken(): Promise<string> {
+	const token = await getAccessToken();
+	if (!token) throw new Error("Unauthorized.");
+	return token;
+}

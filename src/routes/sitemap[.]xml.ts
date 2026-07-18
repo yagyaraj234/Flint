@@ -28,19 +28,11 @@ async function publicRoasts(): Promise<
 	Array<{ createdAt: string; slug: string }>
 > {
 	try {
-		const { db } = await import("#/lib/db.server");
-		const { data, error } = await db
-			.from("roasts")
-			.select("slug,created_at")
-			.eq("status", "done")
-			.order("created_at", { ascending: false });
-		if (error || !Array.isArray(data)) return [];
-
-		return data.flatMap((row) =>
-			typeof row.slug === "string" && typeof row.created_at === "string"
-				? [{ createdAt: row.created_at, slug: row.slug }]
-				: [],
-		);
+		const { getRecentRoasts } = await import("#/lib/api");
+		return (await getRecentRoasts()).map((row) => ({
+			createdAt: row.created_at,
+			slug: row.slug,
+		}));
 	} catch {
 		return [];
 	}

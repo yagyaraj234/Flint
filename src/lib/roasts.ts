@@ -1,3 +1,5 @@
+import type { OwnerRoastRow, Source } from "./api";
+
 export type RoastSource = "synthetic" | "upload" | "bfcl" | "gaia" | "live";
 
 export type RoastStatus = "processing" | "done" | "failed";
@@ -111,4 +113,47 @@ export function findingCounts(value: unknown): FindingCounts {
 		else if (severity === 1) counts.notice += 1;
 	}
 	return counts;
+}
+
+function source(value: Source): RoastSource {
+	return value;
+}
+
+export function mapOwnerRoastToListItem(row: OwnerRoastRow): RoastListItem {
+	return {
+		id: row.id,
+		slug: row.slug,
+		title: row.title,
+		source: source(row.source),
+		score: row.score,
+		tier: row.tier,
+		findingCounts: findingCounts(row.findings),
+		status: row.status,
+		createdAt: row.created_at,
+	};
+}
+
+export function mapOwnerRoastToMetrics(row: OwnerRoastRow): RoastMetrics {
+	return {
+		createdAt: row.created_at,
+		score: row.score,
+		status: row.status,
+		secretCount: row.findings.filter(
+			(finding) => finding.rule === "leaked-secret",
+		).length,
+		wasteUsd: row.cost.waste_usd,
+	};
+}
+
+export function mapOwnerRoastToBatchRoast(row: OwnerRoastRow): BatchRoast {
+	return {
+		id: row.id,
+		slug: row.slug,
+		title: row.title,
+		status: row.status,
+		score: row.score,
+		tier: row.tier,
+		findingCounts: findingCounts(row.findings),
+		error: row.error,
+	};
 }

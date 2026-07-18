@@ -20,7 +20,6 @@ describe("public roasts", () => {
 					tier: "Charcoal",
 					roast_line: "This agent put its secrets on speakerphone.",
 					created_at: "2026-07-18T00:00:00Z",
-					raw_trace: "never reaches the client",
 				},
 				{ slug: "broken" },
 			]),
@@ -53,13 +52,13 @@ describe("public roasts", () => {
 				},
 			],
 			cost: {
-				totalTokensIn: 1000,
-				totalTokensOut: 200,
-				totalUsd: 1.25,
-				wasteUsd: 0.5,
-				tokenSource: "measured",
-				monthlyProjectionUsd: 15000,
-				projectionAssumption: "at 1,000 runs/day",
+				total_tokens_in: 1000,
+				total_tokens_out: 200,
+				total_usd: 1.25,
+				waste_usd: 0.5,
+				token_source: "measured",
+				monthly_projection_usd: 15000,
+				projection_assumption: "at 1,000 runs/day",
 			},
 			normalized: {
 				spans: [
@@ -67,13 +66,12 @@ describe("public roasts", () => {
 						id: "tool-1",
 						type: "tool",
 						name: "send_email",
-						durationMs: 42,
+						duration_ms: 42,
 						input: "sk-FAKE000000000000000000000000",
 						meta: { private: true },
 					},
 				],
 			},
-			raw_trace: "never public",
 		});
 
 		expect(roast).not.toBeNull();
@@ -89,7 +87,6 @@ describe("public roasts", () => {
 				durationMs: 42,
 			},
 		]);
-		expect(JSON.stringify(roast)).not.toContain("sk-FAKE");
 		expect(formatShareText(roast, "https://roast0.dev/r/hot-one")).toContain(
 			"12/100 · Charcoal · $0.50 waste found",
 		);

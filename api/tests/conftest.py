@@ -12,6 +12,7 @@ class FakeQuery:
         self._filters: list[tuple[str, Any]] = []
         self._limit: int | None = None
         self._update: dict[str, Any] | None = None
+        self._order: tuple[str, bool] | None = None
 
     def select(self, *_: Any) -> "FakeQuery":
         return self
@@ -28,7 +29,8 @@ class FakeQuery:
         self._filters.append((col, val))
         return self
 
-    def order(self, *_: Any, **__: Any) -> "FakeQuery":
+    def order(self, column: str, *, desc: bool = False) -> "FakeQuery":
+        self._order = (column, desc)
         return self
 
     def limit(self, n: int) -> "FakeQuery":
@@ -40,6 +42,9 @@ class FakeQuery:
         if self._update is not None:
             for row in rows:
                 row.update(self._update)
+        if self._order is not None:
+            column, descending = self._order
+            rows.sort(key=lambda row: row.get(column), reverse=descending)
         if self._limit is not None:
             rows = rows[: self._limit]
         return type("Result", (), {"data": rows})()
@@ -48,6 +53,7 @@ class FakeQuery:
 class FakeSupabase:
     def __init__(self) -> None:
         self.rows: list[dict[str, Any]] = []
+        self.auth = FakeAuth()
 
     def table(self, _name: str) -> FakeQuery:
         return FakeQuery(self.rows)
@@ -56,11 +62,21 @@ class FakeSupabase:
         return json.dumps(self.rows)
 
 
+class FakeAuth:
+    def get_user(self, token: str) -> Any:
+        if token != "good-token-user-1":
+            raise ValueError("invalid token")
+        user = type("User", (), {"id": "user-1"})()
+        return type("UserResponse", (), {"user": user})()
+
+
 @pytest.fixture
 def fake_db(monkeypatch: pytest.MonkeyPatch) -> FakeSupabase:
     fake = FakeSupabase()
     monkeypatch.setattr("app.pipeline.get_supabase", lambda: fake)
+    monkeypatch.setattr("app.auth.get_supabase", lambda: fake)
     monkeypatch.setattr("app.routers.roasts.get_supabase", lambda: fake)
+    monkeypatch.setattr("app.routers.me.get_supabase", lambda: fake)
     monkeypatch.setattr("app.roast_line.get_supabase", lambda: fake)
     # never call OpenAI from tests; the fallback line path is what's under test
     monkeypatch.setattr("app.roast_line.generate_roast_line", lambda *args: None)

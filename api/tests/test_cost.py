@@ -107,3 +107,15 @@ def test_token_source_is_mixed_when_span_sources_differ() -> None:
     _, report = analyze_cost(make_trace([measured, estimated]), TEST_PRICING)
 
     assert report.token_source == "mixed"
+
+
+def test_cost_report_discloses_models_without_public_pricing() -> None:
+    unknown = make_span("unknown", "one")
+    unknown.model = "unpriced-model"
+    _, unknown_report = analyze_cost(make_trace([unknown]))
+    priced = make_span("priced", "two")
+    priced.model = "gpt-4.1-mini"
+    _, priced_report = analyze_cost(make_trace([priced]))
+
+    assert unknown_report.unpriced_models == ["unpriced-model"]
+    assert priced_report.unpriced_models == []

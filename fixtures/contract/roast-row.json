@@ -82,7 +82,8 @@
     "waste_usd": 0.0021,
     "token_source": "measured",
     "monthly_projection_usd": 63.0,
-    "projection_assumption": "at 1,000 runs/day"
+    "projection_assumption": "at 1,000 runs/day",
+    "unpriced_models": []
   },
   "score": 28,
   "tier": "Charcoal",

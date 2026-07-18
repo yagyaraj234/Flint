@@ -167,5 +167,8 @@ def analyze_cost(
         token_source=_token_source(trace),
         monthly_projection_usd=waste_usd * RUNS_PER_DAY * 30,
         projection_assumption="at 1,000 runs/day",
+        unpriced_models=sorted(
+            {span.model for span in llm_spans if span.model is not None and span.model not in PRICING}
+        ),
     )
     return findings, report

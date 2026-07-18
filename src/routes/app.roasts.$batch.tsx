@@ -30,27 +30,22 @@ const batchValidator = (value: unknown) => {
 
 const loadBatch = createServerFn({ method: "GET" })
 	.validator(batchValidator)
-	.handler(async ({ data }) => {
-		const [{ getBatchRoasts }, { requireAuthenticatedUser }] =
-			await Promise.all([
-				import("#/lib/roasts.server"),
-				import("#/lib/supabase-auth.server"),
-			]);
-		const user = await requireAuthenticatedUser();
-		return getBatchRoasts(data.batchId, user.id);
-	});
+	.handler(({ data }) => loadBatchData(data));
 
-const startBatch = createServerFn({ method: "POST" })
-	.validator(batchValidator)
-	.handler(async ({ data }) => {
-		const [{ processPendingBatch }, { requireAuthenticatedUser }] =
-			await Promise.all([
-				import("#/lib/pipeline.server"),
-				import("#/lib/supabase-auth.server"),
-			]);
-		const user = await requireAuthenticatedUser();
-		await processPendingBatch(data.batchId, user.id);
-	});
+export async function loadBatchData(data: { batchId: string }) {
+	const [
+		{ getMyRoasts },
+		{ mapOwnerRoastToBatchRoast },
+		{ requireAccessToken, requireAuthenticatedUser },
+	] = await Promise.all([
+		import("#/lib/api"),
+		import("#/lib/roasts"),
+		import("#/lib/supabase-auth.server"),
+	]);
+	await requireAuthenticatedUser();
+	const rows = await getMyRoasts(await requireAccessToken(), data.batchId);
+	return rows.map(mapOwnerRoastToBatchRoast);
+}
 
 export const Route = createFileRoute("/app/roasts/$batch")({
 	loader: ({ params }) => loadBatch({ data: { batchId: params.batch } }),
@@ -69,10 +64,6 @@ function BatchStatus() {
 	useEffect(() => {
 		if (settled || rows.length === 0) return;
 		let active = true;
-		// ponytail: status request runs work in-process; use a queue when jobs must outlive server requests.
-		void startBatch({ data: { batchId: batch } }).catch(() => {
-			if (active) setError("Batch processing could not start.");
-		});
 		const timer = window.setInterval(async () => {
 			try {
 				const nextRows = await loadBatch({ data: { batchId: batch } });

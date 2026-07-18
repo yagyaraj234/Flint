@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
 
-import { filterRoasts, summarizeRoasts } from "./roasts";
+import type { OwnerRoastRow } from "./api";
+import {
+	filterRoasts,
+	mapOwnerRoastToListItem,
+	mapOwnerRoastToMetrics,
+	summarizeRoasts,
+} from "./roasts";
 
 describe("dashboard roast helpers", () => {
 	test("summarizes real rows and filters titles", () => {
@@ -81,5 +87,48 @@ describe("dashboard roast helpers", () => {
 			},
 		];
 		expect(filterRoasts(rows, " ")).toBe(rows);
+	});
+
+	test("maps owner rows using snake_case cost fields", () => {
+		const row: OwnerRoastRow = {
+			batch_id: "batch-id",
+			cost: {
+				monthly_projection_usd: 30,
+				projection_assumption: "at 1,000 runs/day",
+				token_source: "measured",
+				total_tokens_in: 10,
+				total_tokens_out: 5,
+				total_usd: 1,
+				unpriced_models: [],
+				waste_usd: 1.25,
+			},
+			created_at: "2026-07-18T12:00:00.000Z",
+			error: null,
+			findings: [
+				{
+					category: "security",
+					message: "Secret",
+					rule: "leaked-secret",
+					severity: 3,
+					span_ids: [],
+				},
+			],
+			id: "one",
+			score: 18,
+			slug: "one",
+			source: "upload",
+			status: "done",
+			tier: "Charcoal",
+			title: "Leaky agent",
+		};
+
+		expect(mapOwnerRoastToListItem(row)).toMatchObject({
+			createdAt: row.created_at,
+			findingCounts: { critical: 1 },
+		});
+		expect(mapOwnerRoastToMetrics(row)).toMatchObject({
+			secretCount: 1,
+			wasteUsd: 1.25,
+		});
 	});
 });
