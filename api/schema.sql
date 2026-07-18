@@ -1,4 +1,5 @@
--- Roast0 schema. Safe to run against a fresh project or the older base schema.
+-- Roast0 schema (v2, from the UI team). Safe to run against a fresh project
+-- or the older stage-0 schema. Run in the Supabase dashboard SQL editor.
 create extension if not exists pgcrypto;
 
 create table if not exists public.roasts (
@@ -28,7 +29,6 @@ alter table public.roasts
   add column if not exists batch_id uuid;
 
 update public.roasts set status = 'done' where status is null;
-update public.roasts set created_at = now() where created_at is null;
 
 alter table public.roasts
   alter column status set default 'done',

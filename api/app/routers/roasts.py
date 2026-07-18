@@ -12,7 +12,7 @@ def recent_roasts() -> list[RecentRoast]:
     result = (
         get_supabase()
         .table("roasts")
-        .select("slug,title,score,tier,created_at")
+        .select("slug,title,score,tier,status,created_at")
         .order("created_at", desc=True)
         .limit(10)
         .execute()

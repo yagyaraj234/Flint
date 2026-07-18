@@ -10,11 +10,16 @@ Source = Literal["synthetic", "upload", "bfcl", "gaia", "live"]
 TraceFormat = Literal["openai-agents", "generic"]
 
 
+RoastStatus = Literal["processing", "done", "failed"]
+
+
 class IngestRequest(BaseModel):
     source: Source
     title: str | None = None
     format: TraceFormat | None = None
     trace: Any
+    user_id: str | None = None
+    batch_id: str | None = None
 
 
 class IngestResponse(BaseModel):
@@ -33,6 +38,10 @@ class RoastRow(BaseModel):
     score: int
     tier: str
     roast_line: str | None = None
+    status: RoastStatus = "done"
+    error: str | None = None
+    user_id: str | None = None
+    batch_id: str | None = None
     created_at: str
 
 
@@ -41,4 +50,5 @@ class RecentRoast(BaseModel):
     title: str
     score: int
     tier: str
+    status: RoastStatus = "done"
     created_at: str

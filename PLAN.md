@@ -35,14 +35,20 @@ Field names are snake_case everywhere, including JSON payloads. The UI adapts; n
 ```
 POST /ingest
   body: { "source": "synthetic"|"upload"|"bfcl"|"gaia"|"live",
-          "title": string?, "format": "openai-agents"|"generic"?, "trace": <any JSON> }
+          "title": string?, "format": "openai-agents"|"generic"?, "trace": <any JSON>,
+          "user_id": uuid?, "batch_id": uuid? }
   200:  { "slug": string }
+  422:  unparseable trace / bad source
 
 GET /roasts/{slug}
-  200: the full roasts row (see data model) | 404
+  200: the full roasts row (see data model; includes status/error/user_id/batch_id) | 404
 
 GET /roasts/recent
-  200: [ { "slug", "title", "score", "tier", "created_at" } ]  // 10 newest
+  200: [ { "slug", "title", "score", "tier", "status", "created_at" } ]  // 10 newest
+
+status is 'processing'|'done'|'failed' (schema v2, from the UI team). The current
+pipeline is synchronous, so backend-written rows are always 'done'; the other
+states exist for UI-side batch/async flows.
 ```
 
 A checked-in example response lives at `fixtures/contract/roast-row.json` (created in stage 1). The UI track builds the card against that file and swaps in the live fetch later. If the contract must change, it changes here first and gets announced out loud.
