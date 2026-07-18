@@ -40,4 +40,4 @@ def test_recent_lists_newest_first_capped_at_10(fake_db: FakeSupabase) -> None:
     assert resp.status_code == 200
     body = resp.json()
     assert len(body) == 10
-    assert set(body[0]) == {"slug", "title", "score", "tier", "created_at"}
+    assert set(body[0]) == {"slug", "title", "score", "tier", "status", "created_at"}

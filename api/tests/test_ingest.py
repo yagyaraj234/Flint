@@ -38,6 +38,23 @@ def test_no_secret_ever_reaches_db(fake_db: FakeSupabase) -> None:
     assert "REDACTED:openai-key" in fake_db.dump()
 
 
+def test_ingest_passes_through_user_and_batch(fake_db: FakeSupabase) -> None:
+    resp = client.post(
+        "/ingest",
+        json={
+            "source": "upload",
+            "trace": _leaked_key_trace(),
+            "user_id": "11111111-1111-1111-1111-111111111111",
+            "batch_id": "22222222-2222-2222-2222-222222222222",
+        },
+    )
+    assert resp.status_code == 200
+    row = fake_db.rows[0]
+    assert row["status"] == "done"
+    assert row["user_id"] == "11111111-1111-1111-1111-111111111111"
+    assert row["batch_id"] == "22222222-2222-2222-2222-222222222222"
+
+
 def test_ingest_rejects_bad_source(fake_db: FakeSupabase) -> None:
     resp = client.post("/ingest", json={"source": "nope", "trace": {}})
     assert resp.status_code == 422

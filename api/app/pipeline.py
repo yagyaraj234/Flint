@@ -15,6 +15,7 @@ from app.db import get_supabase
 from app.models import IngestRequest
 from app.normalize import generic, openai_agents
 from app.normalize.redact import redact_trace, redact_value
+from app.roast_line import fallback_line
 from app.types import NormalizedTrace
 
 
@@ -51,7 +52,12 @@ def run_pipeline(req: IngestRequest) -> str:
         "cost": report.model_dump(),
         "score": score_value,
         "tier": tier(score_value),
-        "roast_line": None,
+        # per-tier fallback; the post-insert background task swaps in the LLM line
+        "roast_line": fallback_line(tier(score_value)),
+        # pipeline is synchronous: a stored row is by definition done
+        "status": "done",
+        "user_id": req.user_id,
+        "batch_id": req.batch_id,
     }
     get_supabase().table("roasts").insert(row).execute()
     return slug
