@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import health, ingest, me, roasts
+from app.routers import health, ingest, integrations, jobs, me, roasts
 
 settings = get_settings()
 
@@ -19,3 +19,5 @@ app.include_router(health.router)
 app.include_router(ingest.router)
 app.include_router(roasts.router)
 app.include_router(me.router)
+app.include_router(integrations.router)
+app.include_router(jobs.router)

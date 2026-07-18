@@ -2,6 +2,7 @@ import { Link, Outlet } from "@tanstack/react-router";
 import {
 	CirclePlus,
 	LayoutDashboard,
+	PlugZap,
 	ScanSearch,
 	UserRound,
 } from "lucide-react";
@@ -15,6 +16,7 @@ const navItems = [
 	{ icon: LayoutDashboard, label: "Dashboard", to: "/app" },
 	{ icon: CirclePlus, label: "New scan", to: "/app/new" },
 	{ icon: ScanSearch, label: "Scans", to: "/app/roasts" },
+	{ icon: PlugZap, label: "Integrations", to: "/app/integrations" },
 	{ icon: UserRound, label: "Profile", to: "/app/profile" },
 ] as const;
 

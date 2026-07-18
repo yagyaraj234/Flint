@@ -14,23 +14,17 @@ function ProfilePage() {
 	const initial = user.email.slice(0, 1).toUpperCase() || "R";
 
 	return (
-		<div className="app-page">
+		<div className="app-page profile-page">
 			<AppPageHeader title="Profile" />
-			<section className="max-w-xl rounded-xl border border-stone-200 bg-white p-6">
-				<div className="flex items-center gap-4">
-					<span aria-hidden="true" className="avatar">
-						{initial}
-					</span>
-					<div>
-						<p className="text-xs font-medium uppercase tracking-wider text-stone-400">
-							Account
-						</p>
-						<p className="mt-1 font-medium text-stone-950">{user.email}</p>
-					</div>
+			<section aria-label="Account" className="profile-page__account">
+				<span aria-hidden="true" className="profile-page__avatar">
+					{initial}
+				</span>
+				<div className="profile-page__identity">
+					<p>Account</p>
+					<h2>{user.email}</h2>
 				</div>
-				<div className="mt-6 border-t border-stone-200 pt-6">
-					<SignOutButton />
-				</div>
+				<SignOutButton />
 			</section>
 		</div>
 	);
