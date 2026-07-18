@@ -1,6 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
 
 import { Logo } from "./brand";
+import { SignOutButton } from "./sign-out-button";
 
 const navItems = [
 	{ label: "Dashboard", to: "/app" },
@@ -9,7 +10,13 @@ const navItems = [
 	{ label: "Settings", to: "/app/settings" },
 ] as const;
 
-export function AppShell() {
+export function AppShell({
+	totalRoasts = 0,
+	user,
+}: {
+	totalRoasts?: number;
+	user: { email: string };
+}) {
 	return (
 		<div className="app-shell">
 			<aside className="app-sidebar">
@@ -26,7 +33,7 @@ export function AppShell() {
 						>
 							{item.label}
 							{item.to === "/app/roasts" ? (
-								<span className="nav-count">0</span>
+								<span className="nav-count">{totalRoasts}</span>
 							) : null}
 						</Link>
 					))}
@@ -38,9 +45,10 @@ export function AppShell() {
 					</div>
 					<div className="account-row">
 						<span aria-hidden="true" className="avatar">
-							R
+							{user.email.slice(0, 1).toUpperCase() || "R"}
 						</span>
-						<span>Account</span>
+						<span title={user.email}>{user.email}</span>
+						<SignOutButton />
 					</div>
 				</div>
 			</aside>
@@ -51,7 +59,7 @@ export function AppShell() {
 						<input placeholder="Search roasts" readOnly type="search" />
 					</label>
 					<span aria-hidden="true" className="avatar">
-						R
+						{user.email.slice(0, 1).toUpperCase() || "R"}
 					</span>
 				</header>
 				<main className="app-content">

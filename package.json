@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@openai/agents": "^0.13.5",
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
