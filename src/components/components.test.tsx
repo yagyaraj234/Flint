@@ -309,6 +309,13 @@ describe("presentational components", () => {
 
 		rerender(
 			<ReportView
+				roast={{ ...roast, findings: [...roast.findings, roast.findings[1]] }}
+			/>,
+		);
+		expect(screen.getByText("Seen 2×")).toBeTruthy();
+
+		rerender(
+			<ReportView
 				roast={{
 					...roast,
 					detailedReport: { ...roast.detailedReport, actions: [] },

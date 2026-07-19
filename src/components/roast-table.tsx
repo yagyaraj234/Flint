@@ -177,7 +177,7 @@ export function RoastTable({
 									<Link
 										className="inline-flex items-center gap-1 font-medium text-accent transition-colors duration-150 hover:text-blue-700"
 										params={{ slug: roast.slug }}
-										to="/r/$slug"
+										to="/app/scans/$slug"
 									>
 										Card <ArrowUpRight size={14} aria-hidden="true" />
 									</Link>

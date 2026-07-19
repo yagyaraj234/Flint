@@ -25,11 +25,15 @@ import { Route as AppIntegrationsRouteImport } from './routes/app.integrations'
 import { Route as AppNewRouteImport } from './routes/app.new'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppRoastsRouteImport } from './routes/app.roasts'
+import { Route as AppScansRouteImport } from './routes/app.scans'
 import { Route as RSlugRouteImport } from './routes/r/$slug'
 import { Route as AppIntegrationsIndexRouteImport } from './routes/app.integrations.index'
 import { Route as AppRoastsIndexRouteImport } from './routes/app.roasts.index'
 import { Route as AppRoastsBatchRouteImport } from './routes/app.roasts.$batch'
+import { Route as AppScansIndexRouteImport } from './routes/app.scans.index'
+import { Route as AppScansSlugRouteImport } from './routes/app.scans.$slug'
 import { Route as AppIntegrationsLangsmithNewRouteImport } from './routes/app.integrations.langsmith.new'
+import { Route as AppScansBatchesBatchRouteImport } from './routes/app.scans.batches.$batch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -111,6 +115,11 @@ const AppRoastsRoute = AppRoastsRouteImport.update({
   path: '/roasts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppScansRoute = AppScansRouteImport.update({
+  id: '/scans',
+  path: '/scans',
+  getParentRoute: () => AppRoute,
+} as any)
 const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
@@ -131,12 +140,27 @@ const AppRoastsBatchRoute = AppRoastsBatchRouteImport.update({
   path: '/$batch',
   getParentRoute: () => AppRoastsRoute,
 } as any)
+const AppScansIndexRoute = AppScansIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppScansRoute,
+} as any)
+const AppScansSlugRoute = AppScansSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AppScansRoute,
+} as any)
 const AppIntegrationsLangsmithNewRoute =
   AppIntegrationsLangsmithNewRouteImport.update({
     id: '/langsmith/new',
     path: '/langsmith/new',
     getParentRoute: () => AppIntegrationsRoute,
   } as any)
+const AppScansBatchesBatchRoute = AppScansBatchesBatchRouteImport.update({
+  id: '/batches/$batch',
+  path: '/batches/$batch',
+  getParentRoute: () => AppScansRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,12 +178,16 @@ export interface FileRoutesByFullPath {
   '/app/new': typeof AppNewRoute
   '/app/profile': typeof AppProfileRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
+  '/app/scans': typeof AppScansRouteWithChildren
   '/r/$slug': typeof RSlugRoute
   '/app/': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
+  '/app/scans/$slug': typeof AppScansSlugRoute
   '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/roasts/': typeof AppRoastsIndexRoute
+  '/app/scans/': typeof AppScansIndexRoute
   '/app/integrations/langsmith/new': typeof AppIntegrationsLangsmithNewRoute
+  '/app/scans/batches/$batch': typeof AppScansBatchesBatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,9 +205,12 @@ export interface FileRoutesByTo {
   '/r/$slug': typeof RSlugRoute
   '/app': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
+  '/app/scans/$slug': typeof AppScansSlugRoute
   '/app/integrations': typeof AppIntegrationsIndexRoute
   '/app/roasts': typeof AppRoastsIndexRoute
+  '/app/scans': typeof AppScansIndexRoute
   '/app/integrations/langsmith/new': typeof AppIntegrationsLangsmithNewRoute
+  '/app/scans/batches/$batch': typeof AppScansBatchesBatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -198,12 +229,16 @@ export interface FileRoutesById {
   '/app/new': typeof AppNewRoute
   '/app/profile': typeof AppProfileRoute
   '/app/roasts': typeof AppRoastsRouteWithChildren
+  '/app/scans': typeof AppScansRouteWithChildren
   '/r/$slug': typeof RSlugRoute
   '/app/': typeof AppIndexRoute
   '/app/roasts/$batch': typeof AppRoastsBatchRoute
+  '/app/scans/$slug': typeof AppScansSlugRoute
   '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/roasts/': typeof AppRoastsIndexRoute
+  '/app/scans/': typeof AppScansIndexRoute
   '/app/integrations/langsmith/new': typeof AppIntegrationsLangsmithNewRoute
+  '/app/scans/batches/$batch': typeof AppScansBatchesBatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,12 +258,16 @@ export interface FileRouteTypes {
     | '/app/new'
     | '/app/profile'
     | '/app/roasts'
+    | '/app/scans'
     | '/r/$slug'
     | '/app/'
     | '/app/roasts/$batch'
+    | '/app/scans/$slug'
     | '/app/integrations/'
     | '/app/roasts/'
+    | '/app/scans/'
     | '/app/integrations/langsmith/new'
+    | '/app/scans/batches/$batch'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -246,9 +285,12 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/app'
     | '/app/roasts/$batch'
+    | '/app/scans/$slug'
     | '/app/integrations'
     | '/app/roasts'
+    | '/app/scans'
     | '/app/integrations/langsmith/new'
+    | '/app/scans/batches/$batch'
   id:
     | '__root__'
     | '/'
@@ -266,12 +308,16 @@ export interface FileRouteTypes {
     | '/app/new'
     | '/app/profile'
     | '/app/roasts'
+    | '/app/scans'
     | '/r/$slug'
     | '/app/'
     | '/app/roasts/$batch'
+    | '/app/scans/$slug'
     | '/app/integrations/'
     | '/app/roasts/'
+    | '/app/scans/'
     | '/app/integrations/langsmith/new'
+    | '/app/scans/batches/$batch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -402,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoastsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/scans': {
+      id: '/app/scans'
+      path: '/scans'
+      fullPath: '/app/scans'
+      preLoaderRoute: typeof AppScansRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/r/$slug': {
       id: '/r/$slug'
       path: '/r/$slug'
@@ -430,12 +483,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoastsBatchRouteImport
       parentRoute: typeof AppRoastsRoute
     }
+    '/app/scans/': {
+      id: '/app/scans/'
+      path: '/'
+      fullPath: '/app/scans/'
+      preLoaderRoute: typeof AppScansIndexRouteImport
+      parentRoute: typeof AppScansRoute
+    }
+    '/app/scans/$slug': {
+      id: '/app/scans/$slug'
+      path: '/$slug'
+      fullPath: '/app/scans/$slug'
+      preLoaderRoute: typeof AppScansSlugRouteImport
+      parentRoute: typeof AppScansRoute
+    }
     '/app/integrations/langsmith/new': {
       id: '/app/integrations/langsmith/new'
       path: '/langsmith/new'
       fullPath: '/app/integrations/langsmith/new'
       preLoaderRoute: typeof AppIntegrationsLangsmithNewRouteImport
       parentRoute: typeof AppIntegrationsRoute
+    }
+    '/app/scans/batches/$batch': {
+      id: '/app/scans/batches/$batch'
+      path: '/batches/$batch'
+      fullPath: '/app/scans/batches/$batch'
+      preLoaderRoute: typeof AppScansBatchesBatchRouteImport
+      parentRoute: typeof AppScansRoute
     }
   }
 }
@@ -468,12 +542,29 @@ const AppRoastsRouteWithChildren = AppRoastsRoute._addFileChildren(
   AppRoastsRouteChildren,
 )
 
+interface AppScansRouteChildren {
+  AppScansSlugRoute: typeof AppScansSlugRoute
+  AppScansIndexRoute: typeof AppScansIndexRoute
+  AppScansBatchesBatchRoute: typeof AppScansBatchesBatchRoute
+}
+
+const AppScansRouteChildren: AppScansRouteChildren = {
+  AppScansSlugRoute: AppScansSlugRoute,
+  AppScansIndexRoute: AppScansIndexRoute,
+  AppScansBatchesBatchRoute: AppScansBatchesBatchRoute,
+}
+
+const AppScansRouteWithChildren = AppScansRoute._addFileChildren(
+  AppScansRouteChildren,
+)
+
 interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppIntegrationsRoute: typeof AppIntegrationsRouteWithChildren
   AppNewRoute: typeof AppNewRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRoastsRoute: typeof AppRoastsRouteWithChildren
+  AppScansRoute: typeof AppScansRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -483,6 +574,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppNewRoute: AppNewRoute,
   AppProfileRoute: AppProfileRoute,
   AppRoastsRoute: AppRoastsRouteWithChildren,
+  AppScansRoute: AppScansRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 

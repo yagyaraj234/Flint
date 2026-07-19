@@ -28,7 +28,7 @@ export function NewRoast() {
 		try {
 			const result = await createUpload({ data: { text, title } });
 			await navigate({
-				to: "/app/roasts/$batch",
+				to: "/app/scans/batches/$batch",
 				params: { batch: result.batch_id },
 			});
 		} catch (submissionError) {

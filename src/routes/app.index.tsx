@@ -49,10 +49,7 @@ function Dashboard() {
 			<section className="mt-8">
 				<div className="mb-3 flex items-center justify-between">
 					<h2 className="text-lg font-semibold text-ink">Recent scans</h2>
-					<Link
-						className={`text-sm font-medium ${accentLink}`}
-						to="/app/roasts"
-					>
+					<Link className={`text-sm font-medium ${accentLink}`} to="/app/scans">
 						View all
 					</Link>
 				</div>

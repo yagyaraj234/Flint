@@ -17,7 +17,7 @@ const SearchContext = createContext("");
 const navItems = [
 	{ icon: LayoutDashboard, label: "Dashboard", to: "/app" },
 	{ icon: CirclePlus, label: "New scan", to: "/app/new" },
-	{ icon: ScanSearch, label: "Scans", to: "/app/roasts" },
+	{ icon: ScanSearch, label: "Scans", to: "/app/scans" },
 	{ icon: PlugZap, label: "Integrations", to: "/app/integrations" },
 	{ icon: CreditCard, label: "Billing", to: "/app/billing" },
 	{ icon: UserRound, label: "Profile", to: "/app/profile" },
@@ -73,7 +73,7 @@ export function AppShell({
 									<item.icon aria-hidden="true" size={16} strokeWidth={1.8} />
 									{item.label}
 								</span>
-								{item.to === "/app/roasts" ? (
+								{item.to === "/app/scans" ? (
 									<span className="hidden h-5.5 min-w-5.5 place-items-center rounded-full bg-surface-alt px-1.5 font-mono text-[11px] text-muted md:grid">
 										{totalRoasts}
 									</span>

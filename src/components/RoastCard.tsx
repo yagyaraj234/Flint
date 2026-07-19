@@ -5,7 +5,7 @@ import { ShareButtons } from "./ShareButtons";
 import { monoLabel } from "./ui";
 
 type ScoreStyle = CSSProperties & { "--score-target": `${number}deg` };
-type FindingGroup = {
+export type FindingGroup = {
 	count: number;
 	finding: PublicRoast["findings"][number];
 	key: string;
@@ -33,7 +33,9 @@ const tierChipStyles: Record<string, string> = {
 	charcoal: "border-ink/40 text-ink",
 };
 
-function groupFindings(findings: PublicRoast["findings"]): FindingGroup[] {
+export function groupFindings(
+	findings: PublicRoast["findings"],
+): FindingGroup[] {
 	const groups = new Map<string, FindingGroup>();
 	for (const finding of findings) {
 		const key = [

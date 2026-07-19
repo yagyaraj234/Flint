@@ -4,7 +4,7 @@ import {
 	type PublicFindingCategory,
 	type PublicRoast,
 } from "../lib/public-roasts";
-import { fixForFinding } from "./RoastCard";
+import { fixForFinding, groupFindings } from "./RoastCard";
 import { ShareButtons } from "./ShareButtons";
 import { ShareDialog } from "./ShareDialog";
 import { monoLabel } from "./ui";
@@ -85,9 +85,9 @@ function spanMeta(
 export function ReportView({ roast }: { roast: PublicRoast }) {
 	const line = roast.roastLine ?? fallbackRoastLine(roast.tier);
 	const findingGroups = categoryOrder.flatMap((category) => {
-		const findings = roast.findings
-			.filter((finding) => finding.category === category)
-			.sort((left, right) => right.severity - left.severity);
+		const findings = groupFindings(roast.findings)
+			.filter(({ finding }) => finding.category === category)
+			.sort((left, right) => right.finding.severity - left.finding.severity);
 		return findings.length > 0 ? [{ category, findings }] : [];
 	});
 	const remediationActions =
@@ -184,10 +184,10 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 									{category}
 								</h3>
 								<ul className="border-t border-line">
-									{findings.map((finding) => (
+									{findings.map(({ count, finding, key }) => (
 										<li
 											className="grid gap-2.5 border-b border-line py-4 sm:grid-cols-[138px_minmax(0,1fr)] sm:gap-4.5"
-											key={`${finding.rule}-${finding.message}-${finding.severity}`}
+											key={key}
 										>
 											<div className="flex flex-wrap items-start gap-2 sm:flex-col">
 												<span
@@ -198,6 +198,11 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 												<code className="font-mono text-[10px] break-anywhere text-muted">
 													{finding.rule}
 												</code>
+												{count > 1 ? (
+													<span className="rounded-full border border-accent/40 px-2 py-0.5 font-mono text-[9px] font-semibold text-accent">
+														Seen {count}×
+													</span>
+												) : null}
 											</div>
 											<p className="text-sm leading-relaxed">
 												{finding.message}

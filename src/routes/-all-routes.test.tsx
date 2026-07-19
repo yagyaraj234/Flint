@@ -107,7 +107,7 @@ vi.mock("@tanstack/react-start/server", () => state.server);
 
 const appModule = await import("./app");
 const authFunctions = await import("../lib/auth.functions");
-const batchModule = await import("./app.roasts.$batch");
+const batchModule = await import("./app.scans.batches.$batch");
 const { createUpload } = await import("./app.new");
 const { loadBatch } = await import("../lib/roast-functions");
 const apiIngestModule = await import("./api.ingest");
@@ -689,7 +689,7 @@ describe("scan route components", () => {
 		fireEvent.click(view.getByRole("button", { name: "Scan traces" }));
 		await waitFor(() =>
 			expect(state.navigate).toHaveBeenCalledWith({
-				to: "/app/roasts/$batch",
+				to: "/app/scans/batches/$batch",
 				params: { batch: "123e4567-e89b-42d3-a456-426614174000" },
 			}),
 		);
@@ -738,7 +738,7 @@ describe("scan route components", () => {
 	});
 
 	test("reports polling failures while a batch is processing", async () => {
-		const BatchStatus = state.routes.get("/app/roasts/$batch")?.options
+		const BatchStatus = state.routes.get("/app/scans/batches/$batch")?.options
 			.component as () => JSX.Element;
 		state.routeParams = { batch: "123e4567-e89b-42d3-a456-426614174000" };
 		state.routeData = [
@@ -779,7 +779,7 @@ describe("scan route components", () => {
 	});
 
 	test("renders each batch status and takes single completed scans to their report", async () => {
-		const BatchStatus = state.routes.get("/app/roasts/$batch")?.options
+		const BatchStatus = state.routes.get("/app/scans/batches/$batch")?.options
 			.component as () => JSX.Element;
 		state.routeParams = { batch: "123e4567-e89b-42d3-a456-426614174000" };
 		state.routeData = [
@@ -830,14 +830,14 @@ describe("scan route components", () => {
 		render(<BatchStatus />);
 		await waitFor(() =>
 			expect(state.navigate).toHaveBeenCalledWith({
-				to: "/r/$slug",
+				to: "/app/scans/$slug",
 				params: { slug: "three" },
 			}),
 		);
 	});
 
 	test("shows a truthful empty state when a batch has no rows", () => {
-		const BatchStatus = state.routes.get("/app/roasts/$batch")?.options
+		const BatchStatus = state.routes.get("/app/scans/batches/$batch")?.options
 			.component as () => JSX.Element;
 		state.routeParams = { batch: "123e4567-e89b-42d3-a456-426614174000" };
 		state.routeData = [];
