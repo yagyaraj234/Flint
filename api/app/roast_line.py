@@ -20,7 +20,11 @@ _PROMPT = """You judge redacted AI-agent traces. Return JSON only with this shap
 {"roast_line":"string","summary":"string","actions":[{"rule":"existing rule", "issue":"string", "impact":"string", "fix":"string", "verification":"string"}]}.
 Use only supplied deterministic findings and trace metadata. Do not invent findings,
 secrets, or numbers. Keep roast_line technical, under 120 characters, no profanity.
-Write summary in plain English. Return up to four actions, ordered by risk."""
+Good roast_line: "search retried 4x with identical args; cache it or stop retrying." Bad: "This trace has problems."
+Write summary in plain English. Return up to four actions, ordered by risk. Each action's
+fix and verification must reference its specific rule and affected span(s), never generic
+boilerplate like "Fix the flagged step, then rerun this trace." Do not return two actions
+for the same rule."""
 
 
 def fallback_line(tier: str) -> str:

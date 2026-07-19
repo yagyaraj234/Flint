@@ -14,6 +14,7 @@ _INSECURE_URL_RE = re.compile(
     r"http://(?!localhost(?:[:/]|$)|127\.0\.0\.1(?:[:/]|$))[^\s\"'<>]+",
     re.IGNORECASE,
 )
+_SLOW_SPAN_MS = 15_000
 
 
 def _leaked_secret_findings(redaction_hits: Sequence[RedactionHit]) -> list[Finding]:
@@ -107,10 +108,44 @@ def _error_tail_findings(trace: NormalizedTrace) -> list[Finding]:
     ]
 
 
+def _silent_tool_failure_findings(trace: NormalizedTrace) -> list[Finding]:
+    findings: list[Finding] = []
+    for index, span in enumerate(trace.spans[:-1]):
+        if span.type != "tool" or span.meta.get("status") != "error":
+            continue
+        key = (span.name, _args_hash(span))
+        if any((later.name, _args_hash(later)) == key for later in trace.spans[index + 1 :]):
+            continue
+        findings.append(
+            Finding(
+                rule="silent-tool-failure",
+                category="reliability",
+                severity=2,
+                span_ids=[span.id],
+                message=f"Tool {span.name} failed without a later retry.",
+            )
+        )
+    return findings
+
+
+def _slow_span_findings(trace: NormalizedTrace) -> list[Finding]:
+    return [
+        Finding(
+            rule="slow-span",
+            category="reliability",
+            severity=1,
+            span_ids=[span.id],
+            message=f"This step took {span.duration_ms:g}ms, above the {_SLOW_SPAN_MS}ms threshold.",
+        )
+        for span in trace.spans
+        if span.duration_ms is not None and span.duration_ms > _SLOW_SPAN_MS
+    ]
+
+
 def analyze_roast(
     trace: NormalizedTrace, redaction_hits: Sequence[RedactionHit]
 ) -> list[Finding]:
-    """Return findings from the five security and reliability rules."""
+    """Return findings from deterministic security and reliability rules."""
 
     return [
         *_leaked_secret_findings(redaction_hits),
@@ -118,4 +153,6 @@ def analyze_roast(
         *_insecure_url_findings(trace),
         *_tool_loop_findings(trace),
         *_error_tail_findings(trace),
+        *_silent_tool_failure_findings(trace),
+        *_slow_span_findings(trace),
     ]

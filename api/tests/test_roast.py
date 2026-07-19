@@ -9,6 +9,7 @@ def make_span(
     span_type: SpanType = "llm",
     name: str = "completion",
     status: str | None = None,
+    duration_ms: int | None = None,
 ) -> Span:
     meta = {} if status is None else {"status": status}
     return Span(
@@ -18,7 +19,7 @@ def make_span(
         name=name,
         model="test-model" if span_type == "llm" else None,
         start_ms=None,
-        duration_ms=None,
+        duration_ms=duration_ms,
         tokens_in=10,
         tokens_out=5,
         token_source="measured",
@@ -114,6 +115,41 @@ def test_error_tail_requires_the_final_span_to_have_error_status() -> None:
     assert tail.span_ids == ["tail"]
     assert tail.severity == 2
     assert tail.category == "reliability"
+
+
+def test_silent_tool_failure_requires_no_later_retry_and_excludes_error_tail() -> None:
+    failed = make_span("failed", "{\"q\":\"weather\"}", span_type="tool", name="search", status="error")
+    retry = make_span("retry", "{\"q\":\"weather\"}", span_type="tool", name="search")
+    continued = make_span("continued", "next")
+    tail = make_span("tail", "{\"q\":\"news\"}", span_type="tool", name="search", status="error")
+
+    no_retry = analyze_roast(make_trace([failed, continued]), [])
+    retried = analyze_roast(make_trace([failed, retry, continued]), [])
+    error_tail = analyze_roast(make_trace([continued, tail]), [])
+
+    finding = next(item for item in no_retry if item.rule == "silent-tool-failure")
+    assert finding.span_ids == ["failed"]
+    assert finding.severity == 2
+    assert finding.category == "reliability"
+    assert not any(item.rule == "silent-tool-failure" for item in retried)
+    assert not any(item.rule == "silent-tool-failure" for item in error_tail)
+
+
+def test_slow_span_uses_fifteen_second_threshold() -> None:
+    findings = analyze_roast(
+        make_trace(
+            [
+                make_span("at-threshold", "", duration_ms=15_000),
+                make_span("slow", "", duration_ms=15_001),
+            ]
+        ),
+        [],
+    )
+
+    slow = next(item for item in findings if item.rule == "slow-span")
+    assert slow.span_ids == ["slow"]
+    assert slow.severity == 1
+    assert slow.category == "reliability"
 
 
 def test_empty_clean_trace_has_no_roast_findings() -> None:

@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.roast_line import (
     FALLBACK_LINES,
+    _PROMPT,
     fallback_detailed_report,
     fallback_line,
     generate_luna_assessment,
@@ -23,6 +24,13 @@ def test_fallback_line_per_tier() -> None:
     assert all(len(line) <= 120 for line in FALLBACK_LINES.values())
     assert fallback_line("Charcoal") == FALLBACK_LINES["Charcoal"]
     assert fallback_line("unknown-tier") in FALLBACK_LINES.values()
+
+
+def test_luna_prompt_requires_specific_nonduplicated_actions() -> None:
+    assert "Good roast_line:" in _PROMPT
+    assert "specific rule and affected span(s)" in _PROMPT
+    assert "Fix the flagged step, then rerun this trace." in _PROMPT
+    assert "two actions\nfor the same rule" in _PROMPT
 
 
 def test_generate_returns_none_without_api_key(monkeypatch) -> None:
