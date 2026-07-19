@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Logo } from "../components/Logo";
 import { RoastProductShot } from "../components/RoastProductShot";
@@ -169,7 +169,7 @@ function LandingPage() {
 					aria-hidden="true"
 					className="absolute inset-0 bg-gradient-to-b from-white via-white/15 to-transparent"
 				/>
-				<div className="relative mx-auto flex w-full max-w-[1100px] flex-col px-6 pt-32 pb-9 md:pt-44">
+				<div className="relative mx-auto flex w-full max-w-[1100px] flex-col px-6 pt-32 md:py-44">
 					<p className="max-w-md text-3xl font-semibold tracking-[-0.03em] text-ink md:text-4xl">
 						Find the waste in your first trace.
 					</p>
@@ -179,21 +179,6 @@ function LandingPage() {
 							href="/app/new"
 						>
 							Analyze a trace <ArrowRight size={15} aria-hidden="true" />
-						</a>
-					</div>
-					<div className="mt-28 flex items-center justify-between gap-6 rounded-2xl border border-white/65 bg-white/65 px-5 py-4 shadow-[0_12px_30px_rgba(10,10,10,0.16)] backdrop-blur-xl md:mt-36">
-						<Logo />
-						<p className={`${monoLabel} hidden text-ink/80 md:block`}>
-							Helix · AI agent cost &amp; risk scanner
-						</p>
-						<a
-							className="inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3.5 py-2 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(10,10,10,0.18)] backdrop-blur-sm transition duration-150 hover:bg-white"
-							href="https://github.com/yagyaraj234/Helix"
-							target="_blank"
-							rel="noreferrer"
-						>
-							<Github size={15} aria-hidden="true" />
-							GitHub <ArrowUpRight size={14} aria-hidden="true" />
 						</a>
 					</div>
 				</div>
