@@ -1,14 +1,51 @@
 {
-	"name": "Flint",
+	"name": "flint",
 	"main": "worker.mjs",
 	"compatibility_date": "2026-07-18",
 	"compatibility_flags": ["nodejs_compat"],
 	"workers_dev": true,
 	"preview_urls": true,
+	"routes": [
+		{
+			"pattern": "flint.trevyn.dev",
+			"custom_domain": true
+		}
+	],
 	"triggers": {
 		"crons": ["0 * * * *"]
 	},
+	"secrets": {
+		"required": [
+			"API_URL",
+			"SUPABASE_URL",
+			"SUPABASE_PUBLISHABLE_KEY",
+			"INGEST_TOKEN",
+			"INTERNAL_API_TOKEN",
+			"CRON_SECRET"
+		]
+	},
 	"assets": {
 		"directory": "dist/client"
+	},
+	"env": {
+		"stage": {
+			"name": "flint-stage",
+			"workers_dev": true,
+			"preview_urls": true,
+			"routes": [],
+			"triggers": {
+				"crons": []
+			},
+			"secrets": {
+				"required": [
+					"API_URL",
+					"SUPABASE_URL",
+					"SUPABASE_PUBLISHABLE_KEY",
+					"INGEST_TOKEN",
+					"INTERNAL_API_TOKEN",
+					"CRON_SECRET"
+				]
+			}
+		}
 	}
 }
