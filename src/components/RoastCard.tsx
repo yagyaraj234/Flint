@@ -236,7 +236,7 @@ export function RoastCard({
 								{roast.score}
 							</strong>
 							<span
-								className={`font-mono text-neutral-400 ${preview ? "text-[10px]" : "text-xs"}`}
+								className={`font-mono text-muted ${preview ? "text-[10px]" : "text-xs"}`}
 							>
 								/100
 							</span>
@@ -422,7 +422,7 @@ export function RoastCard({
 								).toLocaleString("en-US")}
 							/>
 						</div>
-						<p className="mt-3 text-right font-mono text-[10px] text-neutral-400">
+						<p className="mt-3 text-right font-mono text-[10px] text-muted">
 							{roast.cost.projectionAssumption}
 						</p>
 					</section>
@@ -443,7 +443,7 @@ export function RoastCard({
 										className="grid grid-cols-[26px_minmax(0,1fr)] items-center gap-3.5 border-t border-line py-3.5 sm:grid-cols-[34px_minmax(0,1fr)_auto]"
 										key={span.id}
 									>
-										<span className="font-mono text-[10px] text-neutral-400">
+										<span className="font-mono text-[10px] text-muted">
 											{String(index + 1).padStart(2, "0")}
 										</span>
 										<div className="min-w-0">
@@ -486,7 +486,7 @@ function SectionHeading({
 			<h2 className="text-xl font-semibold tracking-[-0.02em] text-ink" id={id}>
 				{title}
 			</h2>
-			<span className={`${monoLabel} text-neutral-400`}>{meta}</span>
+			<span className={`${monoLabel} text-muted`}>{meta}</span>
 		</div>
 	);
 }

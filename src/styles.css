@@ -2,15 +2,15 @@
 
 @theme {
 	--color-ink: #0a0a0a;
-	--color-muted: #7a7a7a;
-	--color-accent: #4a7fd6;
+	--color-muted: #6e6e6e;
+	--color-accent: #3266b0;
 	--color-accent-soft: #e4eafc;
 	--color-line: #e5e5e5;
 	--color-surface-alt: #f4f4f5;
 	--color-paper: #fafaf9;
-	--color-tier-rare: #16a34a;
-	--color-tier-medium: #d97706;
-	--color-tier-welldone: #ea580c;
+	--color-tier-rare: #15803d;
+	--color-tier-medium: #a16207;
+	--color-tier-welldone: #c2410c;
 	--color-danger: #dc2626;
 
 	--font-serif: "Instrument Serif", Georgia, serif;

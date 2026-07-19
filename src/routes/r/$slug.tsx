@@ -57,9 +57,7 @@ function PublicRoastPage() {
 			<PublicTopbar />
 			<main className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 sm:py-12">
 				<ReportView roast={roast} />
-				<p
-					className={`${monoLabel} mt-6 text-center text-neutral-400 print:hidden`}
-				>
+				<p className={`${monoLabel} mt-6 text-center text-muted print:hidden`}>
 					Helix · AI agent cost &amp; risk scanner
 				</p>
 			</main>

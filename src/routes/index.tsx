@@ -124,7 +124,7 @@ function LandingPage() {
 				>
 					<RoastProductShot />
 					<p
-						className={`${monoLabel} mt-4 text-center text-neutral-400 normal-case tracking-[0.1em]`}
+						className={`${monoLabel} mt-4 text-center text-muted normal-case tracking-[0.1em]`}
 					>
 						Example report · demo trace
 					</p>

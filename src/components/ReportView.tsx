@@ -312,7 +312,7 @@ export function ReportView({ roast }: { roast: PublicRoast }) {
 								className="grid grid-cols-[26px_minmax(0,1fr)] items-center gap-3.5 border-t border-line py-3.5 sm:grid-cols-[34px_minmax(0,1fr)_auto]"
 								key={span.id}
 							>
-								<span className="font-mono text-[10px] text-neutral-400">
+								<span className="font-mono text-[10px] text-muted">
 									{String(index + 1).padStart(2, "0")}
 								</span>
 								<div className="min-w-0">

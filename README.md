@@ -1,55 +1,52 @@
 # Helix
 
-AI agent cost and risk scanner.
+AI agent cost and risk scanner for completed traces.
 
-Helix scans agent traces for duplicate model calls, bloated prompts, tool loops,
-failed steps, and exposed credentials. It estimates avoidable LLM spend, redacts
-supported secrets before storage, and returns a report with findings, a Helix
-score, and a shareable roast card.
+Helix parses a trace, redacts supported credentials before storage, runs
+deterministic security/reliability/cost checks, scores the result, and creates a
+shareable report. It supports direct uploads, batches, and user-owned LangSmith
+projects. It does not block agent actions at runtime.
 
-## What Helix finds
+## What it finds
 
-- Duplicate LLM calls, repeated prompt bloat, and oversized context
-- Repeated tool calls, failed tools without retry, slow spans, and error tails
-- OpenAI, AWS, GitHub, Slack, and Google API keys in trace data
-- JWTs, bearer tokens, private keys, emails, phone numbers, and plain-http URLs
+- Duplicate model calls, repeated 2,000+ token prompt prefixes, and oversized context
+- Repeated tool calls, failed tools without a later retry, slow spans, and error tails
+- Supported API keys/tokens, plus emails, phone numbers, and insecure HTTP tool URLs
+
+## Architecture
+
+FastAPI owns assessment, Supabase, billing, LangSmith sync, and secrets.
+TanStack Start owns the UI and server-side calls to FastAPI. The browser uses
+Supabase only for authentication and never accesses the `roasts` table.
+
+Supported secrets are redacted before raw or normalized trace data is stored.
+PII findings are detection-only today; emails and phone numbers are not redacted.
+Public report APIs exclude raw traces, owner data, batches, errors, and all
+LangSmith-sourced reports.
 
 ## Run
 
+Copy `api/.env.example` to `api/.env` and configure the backend values. The
+Start server also needs `API_URL`, `SUPABASE_URL`, and either
+`SUPABASE_PUBLISHABLE_KEY` or `SUPABASE_ANON_KEY`; `INTERNAL_API_TOKEN` is
+needed when using LangSmith connections.
+
 ```bash
 # terminal 1
-cd api && uvicorn app.main:app --reload --port 8000
+cd api && ./.venv/bin/python -m uvicorn app.main:app --reload --port 8000
 
 # terminal 2
 bun dev
 ```
 
-The FastAPI backend owns normalize, redact, analyze, score, and Supabase
-storage — it is the only process holding the Supabase service-role key, and
-all `roasts` reads and writes go through it. The TanStack Start frontend uses
-Supabase directly for auth only (publishable key); its server functions
-forward the session's access token to FastAPI, which validates it and derives
-the user. Public report reads return a minimal card DTO — never the raw trace.
-
-Endpoints: `POST /ingest` (token optional), `POST /ingest/batch` (token
-required), `GET /roasts/{slug}` and `GET /roasts/recent` (public card DTOs),
-`GET /me/roasts?batch_id=` (owner reads). Full contract in PLAN.md.
-
-Frontend env is `API_URL` plus the Supabase URL/publishable key for auth.
-Server secrets live only in `api/.env`.
-
-## Verify (mandatory before any PR)
+## Verify
 
 ```bash
-bun run check
-bun run test
-bun run build
-cd api && pytest
+cd api && ./.venv/bin/python -m pytest -q
+cd .. && bun test && bun run check && bun run build
+git diff --check
 ```
 
-`api/tests/test_contract_e2e.py` locks the privacy boundary end to end:
-fixture in through `/ingest`, public read carries no secrets or private
-fields, owner read requires the token.
-
-Internal `roasts` table, API routes, and field names stay stable during the
-hackathon. The roast language belongs only to share cards.
+See [PLAN.md](PLAN.md) for the frozen API, privacy, billing, sharing, and
+LangSmith contracts. See [api/README.md](api/README.md) for backend setup and
+endpoint details.

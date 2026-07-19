@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FileJson, Upload } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useState } from "react";
 
 import { AppPageHeader } from "#/components/app-page-header";
 import { fieldClass, primaryButton } from "#/components/ui";
@@ -10,9 +10,11 @@ export { createUpload } from "#/lib/roast-functions";
 
 export const Route = createFileRoute("/app/new")({ component: NewRoast });
 
-function NewRoast() {
+type InputTab = "paste" | "upload";
+
+export function NewRoast() {
 	const navigate = useNavigate();
-	const [tab, setTab] = useState<"paste" | "upload">("paste");
+	const [tab, setTab] = useState<InputTab>("paste");
 	const [title, setTitle] = useState("");
 	const [text, setText] = useState("");
 	const [fileName, setFileName] = useState("");
@@ -52,7 +54,7 @@ function NewRoast() {
 				className="mt-7 rounded-xl border border-line bg-white p-5 sm:p-7"
 			>
 				<label className="block text-sm font-medium text-ink" htmlFor="title">
-					Title <span className="font-normal text-neutral-400">optional</span>
+					Title <span className="font-normal text-muted">optional</span>
 				</label>
 				<input
 					id="title"
@@ -68,34 +70,41 @@ function NewRoast() {
 					role="tablist"
 					aria-label="Trace input method"
 				>
-					<Tab active={tab === "paste"} onClick={() => setTab("paste")}>
+					<Tab active={tab === "paste"} name="paste" onSelect={setTab}>
 						Paste JSON
 					</Tab>
-					<Tab active={tab === "upload"} onClick={() => setTab("upload")}>
+					<Tab active={tab === "upload"} name="upload" onSelect={setTab}>
 						Upload file
 					</Tab>
 				</div>
 
-				{tab === "paste" ? (
-					<div className="mt-4" role="tabpanel">
-						<label className="sr-only" htmlFor="trace-json">
-							Trace JSON or JSONL
-						</label>
-						<textarea
-							id="trace-json"
-							value={text}
-							onChange={(event) => setText(event.target.value)}
-							rows={13}
-							spellCheck={false}
-							placeholder={'{"spans":[...]}'}
-							className="w-full resize-y rounded-lg border border-ink bg-ink p-4 font-mono text-sm text-neutral-100 outline-none transition duration-150 placeholder:text-neutral-500 focus:border-accent focus:ring-4 focus:ring-accent/20"
-						/>
-					</div>
-				) : (
-					<label
-						className="mt-4 flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-paper text-center transition-colors duration-150 hover:border-accent"
-						role="tabpanel"
-					>
+				<div
+					aria-labelledby="trace-tab-paste"
+					className="mt-4"
+					hidden={tab !== "paste"}
+					id="trace-panel-paste"
+					role="tabpanel"
+				>
+					<label className="sr-only" htmlFor="trace-json">
+						Trace JSON or JSONL
+					</label>
+					<textarea
+						id="trace-json"
+						value={text}
+						onChange={(event) => setText(event.target.value)}
+						rows={13}
+						spellCheck={false}
+						placeholder={'{"spans":[...]}'}
+						className="w-full resize-y rounded-lg border border-ink bg-ink p-4 font-mono text-sm text-neutral-100 outline-none transition duration-150 placeholder:text-neutral-400 focus:border-accent focus:ring-4 focus:ring-accent/20"
+					/>
+				</div>
+				<div
+					aria-labelledby="trace-tab-upload"
+					hidden={tab !== "upload"}
+					id="trace-panel-upload"
+					role="tabpanel"
+				>
+					<label className="mt-4 flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-paper text-center transition-colors duration-150 hover:border-accent">
 						<Upload className="text-accent" aria-hidden="true" />
 						<span className="mt-3 text-sm font-medium text-ink">
 							{fileName || "Choose JSON or JSONL file"}
@@ -115,7 +124,7 @@ function NewRoast() {
 							}}
 						/>
 					</label>
-				)}
+				</div>
 
 				{error && (
 					<p className="mt-4 text-sm text-danger" role="alert">
@@ -142,19 +151,42 @@ function NewRoast() {
 
 function Tab({
 	active,
-	onClick,
+	name,
+	onSelect,
 	children,
 }: {
 	active: boolean;
-	onClick: () => void;
+	name: InputTab;
+	onSelect: (tab: InputTab) => void;
 	children: React.ReactNode;
 }) {
+	function selectFromKeyboard(event: KeyboardEvent<HTMLButtonElement>) {
+		const next =
+			event.key === "ArrowLeft" ||
+			event.key === "ArrowUp" ||
+			event.key === "Home"
+				? "paste"
+				: event.key === "ArrowRight" ||
+						event.key === "ArrowDown" ||
+						event.key === "End"
+					? "upload"
+					: null;
+		if (!next) return;
+		event.preventDefault();
+		onSelect(next);
+		document.getElementById(`trace-tab-${next}`)?.focus();
+	}
+
 	return (
 		<button
+			aria-controls={`trace-panel-${name}`}
 			type="button"
+			id={`trace-tab-${name}`}
 			role="tab"
 			aria-selected={active}
-			onClick={onClick}
+			onClick={() => onSelect(name)}
+			onKeyDown={selectFromKeyboard}
+			tabIndex={active ? 0 : -1}
 			className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors duration-150 ${active ? "border-accent text-accent" : "border-transparent text-muted hover:text-ink"}`}
 		>
 			{children}

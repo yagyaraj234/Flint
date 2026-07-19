@@ -9,7 +9,7 @@ Architecture:
 - `api/app/pipeline.py` owns assessment persistence, ownership, and provenance. Failed batch rows remain redacted.
 - `api/app/billing/entitlements.py` owns Scan admission, Connection eligibility, and retryable Dodo metering. A completed Scan is the only billable outcome; Dodo failures stay pending and never fail a completed Scan.
 - `api/app/integrations/langsmith.py` owns the concrete LangSmith adapter plus `LangSmithConnections` lifecycle/sync module. Connections pause without Pro entitlement and resume only through an explicit user action.
-- TanStack Start (`src/`) server-fetches data from FastAPI at `API_URL`. Frontend may use Supabase only for auth and file storage, never the `roasts` table.
+- TanStack Start (`src/`) server-fetches data from FastAPI at `API_URL`. It may use Supabase only for auth and file storage, never the `roasts` table. LangSmith server functions additionally use `INTERNAL_API_TOKEN`; browser code never sees it.
 
 Domain terms (`CONTEXT.md`):
 
@@ -29,7 +29,7 @@ Rules:
 
 - Backend: Python 3.11+, Pydantic request/response models, type hints everywhere. Frontend: strict TypeScript, no `any`.
 - `api/app/normalize/` and `api/app/analyze/` remain pure: no FastAPI, Supabase, or network imports.
-- Secrets stay server-only in `api/.env`; never log, return, or expose them. Frontend env is `API_URL` only.
+- Secrets stay server-only in `api/.env`; never log, return, or expose them. The Start server also needs `API_URL`, Supabase URL/publishable auth key, and (for LangSmith) `INTERNAL_API_TOKEN`; only the publishable auth key may reach browser code.
 - Keep field names snake_case through FastAPI. Public roast reads must exclude raw trace, owner identity, batch data, errors, and LangSmith rows.
 - Do not add dependencies without approval. Preserve Dodo's stable event id when retrying metering.
 - Schema changes need both `api/schema.sql` and a timestamped `supabase/migrations/` file.

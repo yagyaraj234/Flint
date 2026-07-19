@@ -92,7 +92,7 @@ export function AppShell({
 						<label className="w-full max-w-[420px]">
 							<span className="sr-only">Search scans by title</span>
 							<input
-								className="h-10 w-full rounded-lg border border-line bg-paper px-3.5 text-sm text-ink outline-none transition duration-150 placeholder:text-neutral-400 focus:border-accent focus:ring-4 focus:ring-accent/10"
+								className="h-10 w-full rounded-lg border border-line bg-paper px-3.5 text-sm text-ink outline-none transition duration-150 placeholder:text-muted focus:border-accent focus:ring-4 focus:ring-accent/10"
 								onChange={(event) => setSearch(event.target.value)}
 								placeholder="Search scans"
 								type="search"

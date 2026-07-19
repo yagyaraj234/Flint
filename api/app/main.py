@@ -2,12 +2,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.rate_limit import RateLimitMiddleware
 from app.routers import billing, health, ingest, integrations, jobs, me, roasts
 
 settings = get_settings()
 
 app = FastAPI(title="Helix API")
 
+app.add_middleware(
+    RateLimitMiddleware,
+    requests=settings.rate_limit_requests,
+    window_seconds=settings.rate_limit_window_seconds,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

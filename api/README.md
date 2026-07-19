@@ -1,36 +1,47 @@
 # Helix API
 
-FastAPI backend for Helix, security scanning for AI agent traces. Owns the whole
-pipeline: normalize → redact → analyze → score → Supabase. Helix redacts
-supported secrets before storage. See PLAN.md at the repo root for the contract
-and stage plan.
-
-## Endpoints
-
-- `POST /ingest` — `{source, title?, format?, trace}` → `{slug}`. Runs normalize → redact → deterministic checks → model assessment → Supabase.
-- `GET /roasts/recent` — 10 newest `{slug, title, score, tier, created_at}`
-- `GET /roasts/{slug}` — full row, 404 if missing
-- `GET /health`
+FastAPI backend for Helix. It owns trace assessment, redacted persistence,
+Supabase auth validation, report sharing, Dodo billing, and LangSmith sync.
 
 ## Run
 
-Requires Python 3.11+ (uses `X | None` annotations).
+Requires Python 3.11+.
 
-```
+```bash
 cd api
-python3.12 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env   # fill in Supabase + OpenAI keys — empty values = 500s on DB routes
-uvicorn app.main:app --reload --port 8000
+python3 -m venv .venv
+./.venv/bin/pip install -r requirements.txt
+cp .env.example .env
+./.venv/bin/python -m uvicorn app.main:app --reload --port 8000
 ```
+
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are required for database-backed
+routes. `OPENAI_API_KEY` is optional: without it, the deterministic fallback
+roast line and detailed report are persisted. Configure Dodo values only for
+checkout/metering, and LangSmith/cron values only for connections and scheduled
+sync. Never place frontend Supabase keys in this file.
+
+## Endpoint groups
+
+- `POST /ingest`, `POST /ingest/batch`: assess traces. Single ingest is
+  anonymous or authenticated; batch ingest requires a Bearer token.
+- `GET /roasts/recent`, `GET /roasts/{slug}`: public report reads subject to
+  visibility and recipient checks.
+- `/me/roasts*`: authenticated owner reads and visibility/share management.
+- `/billing/status`, `/billing/checkout`: authenticated billing. `/billing/webhook`
+  accepts only a verified Dodo webhook.
+- `/integrations/langsmith*`: Start-server-only routes protected by
+  `X-Internal-Api-Token` and `X-User-Id`; never call them from the browser.
+- `POST /internal/jobs/langsmith-hourly`: cron-only route protected by
+  `X-Cron-Secret`.
+- `GET /health`: `{ "status": "ok" }`.
+
+Full request/response and privacy contract: [../PLAN.md](../PLAN.md).
 
 ## Test
 
-```
-pytest
+```bash
+cd api && ./.venv/bin/python -m pytest -q
 ```
 
-Tests use a fake in-memory Supabase (tests/conftest.py), no network needed.
-
-`OPENAI_API_KEY` is required for the `gpt-5.6-terra` detailed assessment. Without
-it, ingest still stores a deterministic fallback report.
+Tests use an in-memory Supabase fake and do not need network credentials.

@@ -1,7 +1,9 @@
 from functools import lru_cache
 
+from typing import Annotated
+
 from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, NoDecode
 
 
 class Settings(BaseSettings):
@@ -9,7 +11,9 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     openai_api_key: str = ""
     roast_model: str = "gpt-5.6-terra"
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000"]
+    rate_limit_requests: int = 60
+    rate_limit_window_seconds: int = 60
     internal_api_token: str = ""
     cron_secret: str = ""
     langsmith_credential_key: str = ""
@@ -29,6 +33,20 @@ class Settings(BaseSettings):
     @classmethod
     def default_roast_model(cls, value: str | None) -> str:
         return value.strip() if isinstance(value, str) and value.strip() else "gpt-5.6-terra"
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: str | list[str]) -> list[str]:
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
+
+    @field_validator("rate_limit_requests", "rate_limit_window_seconds")
+    @classmethod
+    def positive_rate_limit(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("must be at least 1")
+        return value
 
 
 @lru_cache

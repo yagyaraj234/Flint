@@ -70,19 +70,14 @@ Avoid:
 
 Trace data genuinely carries sensitive-content risk: OpenAI's Agents SDK says generation and function spans can contain sensitive inputs/outputs, and OpenTelemetry warns that tool-call arguments and results may contain sensitive information. [OpenAI tracing docs](https://openai.github.io/openai-agents-js/guides/tracing/#sensitive-data), [OpenTelemetry GenAI attributes](https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/). OWASP's Agentic Top 10 supplies credible security context, but it is a risk framework, not proof that Helix covers all agentic risks. [OWASP official page](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
 
-## Current landing-copy audit
+## Landing-copy implementation status
 
-| Current copy | Verdict | Recommended change |
-|---|---|---|
-| “Catch what your agents leak.” | Replace | Makes Helix read as a secrets scanner. Lead with avoidable cost instead. |
-| “Helix scans every agent trace…” | Tighten | Drop “every”; current parsers are OpenAI Agents and generic trace shapes ([assessment.py](api/app/assessment.py#L30-L38)). |
-| “unsafe tool calls” | Replace | Use “tool loops and failed steps” or “insecure tool URLs and repeated calls.” |
-| “runaway costs” | Replace | Use “token waste.” Helix identifies specific duplicate/bloated inputs and estimates waste; it does not detect arbitrary budget runaway. |
-| “Then it redacts what it finds” | Replace | Use “Helix redacts supported secrets before Helix stores the trace.” |
-| “Deterministic checks for trace data that should never reach production.” | Replace | “Deterministic checks for problems hidden inside completed agent traces.” Current line conflicts with production LangSmith scans. |
-| “Scan a trace” | Keep | Best CTA in set: concrete verb plus concrete object. More specific than competitors' “start,” “build,” and “demo.” |
-| “Live report UI · illustrative redacted demo trace” | Tighten | “Example report · redacted demo trace.” “Live” and “illustrative” pull in opposite directions. |
-| “Security scanning for AI agent traces” | Replace | “AI agent cost and risk scanner.” Current descriptor leads with the secondary job. |
+The landing page now uses the recommended cost-first headline, descriptor,
+support copy, and **Analyze a trace** CTA. Its implemented findings list names
+the concrete deterministic checks, and its product preview is labelled
+“Example report · demo trace.” Keep new copy within the post-run boundary and
+do not reintroduce “every trace,” runtime-protection, or universal-redaction
+claims.
 
 Implemented proof behind the message:
 
@@ -127,12 +122,8 @@ Implemented proof behind the message:
 
 Do not test more until click-through or scan-start volume can distinguish them. Copy variants without traffic are decoration.
 
-## Fix before promoting API as proof
+## API proof
 
-Current homepage command is not executable against the frontend `/api/ingest` route:
-
-```sh
-curl -X POST helix.trevyn.dev/api/ingest -d @trace.json
-```
-
-That route requires `Authorization: Bearer <INGEST_TOKEN>`, parses JSON, and expects the trace under a `trace` property ([api.ingest.ts](src/routes/api.ingest.ts#L3-L69)). Keep API as a capability, but do not use this command as hero proof until command, auth story, and payload shape agree. This is a copy/trust blocker, not a positioning problem.
+The homepage no longer presents a curl command as product proof. Keep direct
+API examples in the versioned backend contract, where their authentication and
+payload shape can stay accurate.

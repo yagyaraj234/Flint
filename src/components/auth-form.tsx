@@ -34,7 +34,7 @@ export function AuthField({
 				aria-describedby={error ? errorId : undefined}
 				aria-invalid={Boolean(error)}
 				autoComplete={autoComplete}
-				className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition duration-150 placeholder:text-neutral-400 focus:border-accent focus:ring-4 focus:ring-accent/10"
+				className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition duration-150 placeholder:text-muted focus:border-accent focus:ring-4 focus:ring-accent/10"
 				id={id}
 				maxLength={maxLength}
 				minLength={minLength}

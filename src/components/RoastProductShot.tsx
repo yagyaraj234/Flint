@@ -64,7 +64,7 @@ export function RoastProductShot() {
 					<span className="size-2.5 rounded-full bg-[#febc2e]" />
 					<span className="size-2.5 rounded-full bg-[#28c840]" />
 				</div>
-				<div className="mx-auto flex min-w-0 items-center rounded-md border border-line bg-white px-3 py-1.5 font-mono text-[11px] text-neutral-400">
+				<div className="mx-auto flex min-w-0 items-center rounded-md border border-line bg-white px-3 py-1.5 font-mono text-[11px] text-muted">
 					helix.trevyn.dev/r/demo-trace
 				</div>
 				<div aria-hidden="true" className="w-9 flex-none" />
