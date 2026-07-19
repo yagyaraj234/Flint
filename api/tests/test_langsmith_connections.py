@@ -302,7 +302,7 @@ def test_internal_endpoints_reject_missing_or_wrong_secrets(monkeypatch: Any) ->
     _settings(monkeypatch)
     client = TestClient(app)
     assert client.get("/integrations/langsmith").status_code == 401
-    assert client.post("/internal/jobs/langsmith-hourly", headers={"x-cron-secret": "nope"}).status_code == 401
+    assert client.post("/internal/jobs/langsmith-sync", headers={"x-cron-secret": "nope"}).status_code == 401
 
 
 def test_discovery_returns_safe_workspace_and_project_metadata(monkeypatch: Any) -> None:

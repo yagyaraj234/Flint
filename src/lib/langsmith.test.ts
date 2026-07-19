@@ -38,6 +38,7 @@ describe("LangSmith server-function validation", () => {
 			api_key: " key ",
 			workspace_id: " workspace ",
 			project_name: " project ",
+			sync_cron: " 0 * * * * ",
 		};
 		expect(validateConnectionInput(connection)).toEqual({
 			...connection,
@@ -46,6 +47,7 @@ describe("LangSmith server-function validation", () => {
 			api_key: "key",
 			workspace_id: "workspace",
 			project_name: "project",
+			sync_cron: "0 * * * *",
 		});
 		expect(validateStatusUpdate({ id: "one", status: "paused" })).toEqual({
 			id: "one",

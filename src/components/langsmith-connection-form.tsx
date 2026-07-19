@@ -8,6 +8,12 @@ import {
 import { fieldClass, monoLabel } from "./ui";
 
 const defaultEndpoint = "https://api.smith.langchain.com";
+const schedules = [
+	{ label: "Every 30 minutes", value: "*/30 * * * *" },
+	{ label: "Every hour", value: "0 * * * *" },
+	{ label: "Every 12 hours", value: "0 */12 * * *" },
+	{ label: "Every 24 hours", value: "0 0 * * *" },
+];
 
 export function LangSmithConnectionForm({
 	onConnected,
@@ -21,6 +27,8 @@ export function LangSmithConnectionForm({
 	const [workspaceId, setWorkspaceId] = useState("");
 	const [projects, setProjects] = useState<Project[]>([]);
 	const [projectName, setProjectName] = useState("");
+	const [schedule, setSchedule] = useState("0 * * * *");
+	const [customCron, setCustomCron] = useState("");
 	const [validatedFor, setValidatedFor] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState("");
@@ -91,6 +99,7 @@ export function LangSmithConnectionForm({
 					api_key: apiKey,
 					workspace_id: workspaceId,
 					project_name: projectName,
+					sync_cron: schedule === "custom" ? customCron : schedule,
 				},
 			});
 			setApiKey("");
@@ -209,10 +218,40 @@ export function LangSmithConnectionForm({
 				</div>
 			) : null}
 			{validated && workspaceId && projectName ? (
-				<p className="mt-6 border-t border-line pt-4 text-[13px] leading-relaxed text-muted">
-					{projectName} will be scanned hourly. The first pass covers the last
-					24 hours, up to 50 completed traces.
-				</p>
+				<div className="mt-6 grid gap-4 border-t border-line pt-6 sm:grid-cols-2">
+					<Field id="langsmith-schedule" label="Sync schedule">
+						<select
+							id="langsmith-schedule"
+							className={fieldClass}
+							value={schedule}
+							onChange={(event) => setSchedule(event.target.value)}
+						>
+							{schedules.map((option) => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+							<option value="custom">Custom cron</option>
+						</select>
+					</Field>
+					{schedule === "custom" ? (
+						<Field id="langsmith-custom-cron" label="Custom cron (UTC)">
+							<input
+								id="langsmith-custom-cron"
+								value={customCron}
+								onChange={(event) => setCustomCron(event.target.value)}
+								placeholder="0 9 * * 1-5"
+								required
+								className={fieldClass}
+							/>
+						</Field>
+					) : null}
+					<p className="text-[13px] leading-relaxed text-muted sm:col-span-2">
+						{projectName} starts with the last 24 hours, up to 50 completed
+						traces. Custom cron uses five fields in UTC and must run on :00 or
+						:30.
+					</p>
+				</div>
 			) : null}
 			{error ? (
 				<p className="mt-4 text-sm text-danger" role="alert">
@@ -221,7 +260,13 @@ export function LangSmithConnectionForm({
 			) : null}
 			<button
 				type="submit"
-				disabled={busy || !validated || !workspaceId || !projectName}
+				disabled={
+					busy ||
+					!validated ||
+					!workspaceId ||
+					!projectName ||
+					(schedule === "custom" && !customCron.trim())
+				}
 				className="mt-8 min-h-12 w-full rounded-[10px] bg-ink text-sm font-semibold text-white transition duration-150 ease-out hover:bg-neutral-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45"
 			>
 				{busy ? "Connecting…" : "Connect LangSmith"}

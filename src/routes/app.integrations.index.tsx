@@ -27,7 +27,7 @@ function IntegrationsPage() {
 		<main>
 			<AppPageHeader
 				title="Integrations"
-				description="Connect LangSmith projects for redacted hourly scans."
+				description="Connect LangSmith projects for scheduled redacted scans."
 				action={
 					<Link to="/app/integrations/langsmith/new" className={primaryButton}>
 						Connect LangSmith
@@ -73,7 +73,7 @@ function Empty() {
 			</h2>
 			<p className="mx-auto mt-2 max-w-md text-sm text-muted">
 				Connect a project with a workspace-scoped service key. Helix scans
-				completed traces hourly and redacts before storage.
+				completed traces on your schedule and redacts before storage.
 			</p>
 			<Link
 				to="/app/integrations/langsmith/new"

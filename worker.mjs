@@ -1,16 +1,16 @@
 import server from "./dist/server/server.js";
 
-async function runLangSmithHourly(env) {
+async function runLangSmithSync(env) {
 	if (!env.API_URL || !env.CRON_SECRET) {
-		console.error("LangSmith hourly job is not configured.");
+		console.error("LangSmith sync job is not configured.");
 		return;
 	}
 	const response = await fetch(
-		`${env.API_URL.replace(/\/$/, "")}/internal/jobs/langsmith-hourly`,
+		`${env.API_URL.replace(/\/$/, "")}/internal/jobs/langsmith-sync`,
 		{ method: "POST", headers: { "x-cron-secret": env.CRON_SECRET } },
 	);
 	if (!response.ok) {
-		console.error(`LangSmith hourly job failed with status ${response.status}.`);
+		console.error(`LangSmith sync job failed with status ${response.status}.`);
 	}
 }
 
@@ -19,6 +19,6 @@ export default {
 		return server.fetch(...args);
 	},
 	scheduled(_controller, env, ctx) {
-		ctx.waitUntil(runLangSmithHourly(env));
+		ctx.waitUntil(runLangSmithSync(env));
 	},
 };

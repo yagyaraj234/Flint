@@ -1,6 +1,10 @@
 import { Pause, Play, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { formatSyncTime, type LangSmithConnection } from "#/lib/langsmith";
+import {
+	formatSyncSchedule,
+	formatSyncTime,
+	type LangSmithConnection,
+} from "#/lib/langsmith";
 import {
 	deleteLangSmithConnection,
 	reconnectLangSmithConnection,
@@ -51,6 +55,12 @@ export function LangSmithConnectionCard({
 				</span>
 			</div>
 			<div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+				<p className="text-muted">
+					Schedule{" "}
+					<span className="block font-medium text-ink">
+						{formatSyncSchedule(connection.sync_cron)}
+					</span>
+				</p>
 				<p className="text-muted">
 					Last success{" "}
 					<span className="block font-medium text-ink">
@@ -168,8 +178,8 @@ function safeError(value: string): string {
 	if (value === "invalid_key")
 		return "Key rejected. Reconnect with a valid LangSmith key.";
 	if (value === "rate_limited")
-		return "LangSmith rate limited the last scan. Helix will retry hourly.";
-	return "Last scan did not complete. Helix will retry hourly.";
+		return "LangSmith rate limited the last scan. Helix will retry on its next scheduled run.";
+	return "Last scan did not complete. Helix will retry on its next scheduled run.";
 }
 
 function badgeClass(status: LangSmithConnection["status"]): string {

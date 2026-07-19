@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import httpx
 
 from app.config import get_settings
+from app.cron import DEFAULT_SYNC_CRON
 from app.models import IngestRequest, LangSmithConnectionCreate, LangSmithConnectionResponse, LangSmithConnectionUpdate
 from app.pipeline import run_pipeline
 from app.security.credentials import CredentialError, decrypt_credential, encrypt_credential
@@ -219,6 +220,7 @@ def connection_response(row: dict[str, Any]) -> LangSmithConnectionResponse:
         workspace_id=str(row["workspace_id"]),
         project_name=str(row["project_name"]),
         status=row.get("status", "active"),
+        sync_cron=row.get("sync_cron", DEFAULT_SYNC_CRON),
         last_sync_finished_at=row.get("last_sync_finished_at"),
         last_success_at=row.get("last_success_at"),
         last_scan_count=row.get("last_scan_count", 0),
@@ -252,6 +254,7 @@ def create_connection(db: Any, user_id: str, data: LangSmithConnectionCreate) ->
         "endpoint": _endpoint(data.endpoint),
         "workspace_id": data.workspace_id.strip(),
         "project_name": data.project_name.strip(),
+        "sync_cron": data.sync_cron,
         "api_key_encrypted": encrypt_credential(data.api_key),
         "key_version": 1,
     }

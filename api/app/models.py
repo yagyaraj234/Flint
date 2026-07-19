@@ -5,6 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.cron import DEFAULT_SYNC_CRON, normalize_sync_cron
 from app.types import CostReport, Finding, NormalizedTrace
 
 Source = Literal["synthetic", "upload", "bfcl", "gaia", "live", "langsmith"]
@@ -162,6 +163,12 @@ class LangSmithConnectionCreate(BaseModel):
     api_key: str
     workspace_id: str
     project_name: str
+    sync_cron: str = DEFAULT_SYNC_CRON
+
+    @field_validator("sync_cron")
+    @classmethod
+    def validate_sync_cron(cls, value: str) -> str:
+        return normalize_sync_cron(value)
 
 
 class LangSmithConnectionUpdate(BaseModel):
@@ -171,6 +178,12 @@ class LangSmithConnectionUpdate(BaseModel):
     workspace_id: str | None = None
     project_name: str | None = None
     status: ConnectionStatus | None = None
+    sync_cron: str | None = None
+
+    @field_validator("sync_cron")
+    @classmethod
+    def validate_sync_cron(cls, value: str | None) -> str | None:
+        return normalize_sync_cron(value) if value is not None else None
 
 
 class LangSmithValidateKeyRequest(BaseModel):
@@ -189,6 +202,7 @@ class LangSmithConnectionResponse(BaseModel):
     workspace_id: str
     project_name: str
     status: ConnectionStatus
+    sync_cron: str = DEFAULT_SYNC_CRON
     last_sync_finished_at: str | None = None
     last_success_at: str | None = None
     last_scan_count: int = 0

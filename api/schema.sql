@@ -83,6 +83,7 @@ create table if not exists public.langsmith_connections (
   api_key_encrypted text not null,
   key_version smallint not null default 1 check (key_version > 0),
   status text not null default 'active' check (status in ('active', 'paused', 'invalid', 'disconnected')),
+  sync_cron text not null default '0 * * * *' check (char_length(trim(sync_cron)) > 0),
   cursor_time timestamptz,
   cursor_run_id text,
   sync_locked_until timestamptz,

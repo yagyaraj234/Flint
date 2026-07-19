@@ -11,6 +11,7 @@ export interface LangSmithConnection {
 	workspace_id: string;
 	project_name: string;
 	status: LangSmithConnectionStatus;
+	sync_cron: string;
 	last_sync_finished_at: string | null;
 	last_success_at: string | null;
 	last_scan_count: number;
@@ -32,6 +33,7 @@ export interface LangSmithConnectionInput {
 	api_key: string;
 	workspace_id: string;
 	project_name: string;
+	sync_cron: string;
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -81,6 +83,10 @@ export function validateConnectionInput(
 		api_key: string(value.api_key, "Enter a LangSmith API key.", 1000),
 		workspace_id: string(value.workspace_id, "Choose a workspace.", 200),
 		project_name: string(value.project_name, "Choose a project.", 200),
+		sync_cron: string(value.sync_cron, "Choose a sync schedule.", 100).replace(
+			/\s+/g,
+			" ",
+		),
 	};
 }
 
@@ -133,4 +139,15 @@ export function formatSyncTime(value: string | null): string {
 				dateStyle: "medium",
 				timeStyle: "short",
 			}).format(date);
+}
+
+export function formatSyncSchedule(value: string): string {
+	return (
+		{
+			"*/30 * * * *": "Every 30 minutes",
+			"0 * * * *": "Every hour",
+			"0 */12 * * *": "Every 12 hours",
+			"0 0 * * *": "Every 24 hours",
+		}[value] ?? `Custom: ${value}`
+	);
 }

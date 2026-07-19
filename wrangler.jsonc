@@ -12,7 +12,7 @@
 		}
 	],
 	"triggers": {
-		"crons": ["0 * * * *"]
+		"crons": ["*/30 * * * *"]
 	},
 	"secrets": {
 		"required": [

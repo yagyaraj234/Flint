@@ -32,7 +32,7 @@ sync. Never place frontend Supabase keys in this file.
   accepts only a verified Dodo webhook.
 - `/integrations/langsmith*`: Start-server-only routes protected by
   `X-Internal-Api-Token` and `X-User-Id`; never call them from the browser.
-- `POST /internal/jobs/langsmith-hourly`: cron-only route protected by
+- `POST /internal/jobs/langsmith-sync`: cron-only route protected by
   `X-Cron-Secret`.
 - `GET /health`: `{ "status": "ok" }`.
 

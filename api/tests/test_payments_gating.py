@@ -304,7 +304,7 @@ def test_metering_retry_preserves_the_original_dodo_event_id(
     assert db.rows["usage_events"][0]["status"] == "sent"
 
 
-def test_hourly_sync_pauses_free_and_syncs_pro(
+def test_scheduled_sync_pauses_free_and_syncs_due_pro(
     db: FakeDb, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     free = _connection("free-connection", "free-user")
@@ -329,8 +329,9 @@ def test_hourly_sync_pauses_free_and_syncs_pro(
         "ingest_usage_event",
         lambda customer_id, **_kwargs: dodo_calls.append(customer_id),
     )
+    monkeypatch.setattr(jobs, "_now", lambda: datetime(2026, 7, 19, 0, 0, tzinfo=UTC))
 
-    assert jobs.langsmith_hourly("cron") == {"scanned": 3}
+    assert jobs.langsmith_sync("cron") == {"scanned": 3}
     assert synced == ["pro-connection"]
     assert dodo_calls == ["customer-pro"] * 3
     assert free["status"] == "paused"

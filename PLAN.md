@@ -78,9 +78,9 @@ Cost totals identify `measured`, `estimated`, or `mixed` token use; an
 | `POST /billing/checkout` | Required | Creates a Dodo checkout session. |
 | `POST /billing/webhook` | Dodo signature | Updates subscription state. |
 | `/integrations/langsmith/*` | Internal Start-server headers | Creates, lists, updates, syncs, and removes the current user's LangSmith connections. API keys are encrypted server-side and never returned. |
-| `POST /internal/jobs/langsmith-hourly` | Cron secret | Flushes pending metering, pauses ineligible connections, and syncs eligible active connections. |
+| `POST /internal/jobs/langsmith-sync` | Cron secret | Flushes pending metering, pauses ineligible connections, and syncs eligible active connections whose five-field UTC cron is due. The worker invokes it every 30 minutes. |
 
-LangSmith Connections use an API key, workspace, and project. Completed traces
+LangSmith Connections use an API key, workspace, project, and user-selected five-field UTC sync cron. Completed traces
 are fetched with bounded batches, overlap, a database lease, and idempotent
 connection/trace provenance. Connections without Pro entitlement pause and
 resume only through an explicit operator action. LangSmith reports never appear

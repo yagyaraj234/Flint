@@ -46,6 +46,7 @@ const reconnectLangSmithConnection = mock(() =>
 		workspace_id: "workspace-1",
 		project_name: "support-agent",
 		status: "active",
+		sync_cron: "0 * * * *",
 		last_sync_finished_at: null,
 		last_success_at: null,
 		last_scan_count: 0,
@@ -235,6 +236,7 @@ describe("LangSmithConnectionForm", () => {
 			workspace_id: "workspace-1",
 			project_name: "support-agent",
 			status: "active" as const,
+			sync_cron: "0 * * * *",
 			last_sync_finished_at: null,
 			last_success_at: null,
 			last_scan_count: 0,
@@ -243,8 +245,26 @@ describe("LangSmithConnectionForm", () => {
 		createLangSmithConnection.mockResolvedValueOnce(connection);
 		render(<LangSmithConnectionForm onConnected={onConnected} />);
 		await fillAndValidate();
+		fireEvent.change(screen.getByLabelText("Sync schedule"), {
+			target: { value: "custom" },
+		});
+		fireEvent.change(screen.getByLabelText("Custom cron (UTC)"), {
+			target: { value: "0 9 * * 1-5" },
+		});
 		fireEvent.submit(
 			screen.getByRole("form", { name: "LangSmith connection" }),
+		);
+		await waitFor(() =>
+			expect(createLangSmithConnection).toHaveBeenCalledWith({
+				data: {
+					label: "Production",
+					endpoint: "https://api.smith.langchain.com",
+					api_key: "lsv2_connect",
+					workspace_id: "workspace-1",
+					project_name: "support-agent",
+					sync_cron: "0 9 * * 1-5",
+				},
+			}),
 		);
 		await waitFor(() => expect(onConnected).toHaveBeenCalledWith(connection));
 	});
@@ -259,6 +279,7 @@ describe("LangSmithConnectionForm", () => {
 					workspace_id: "workspace-1",
 					project_name: "support-agent",
 					status: "invalid",
+					sync_cron: "0 * * * *",
 					last_sync_finished_at: null,
 					last_success_at: null,
 					last_scan_count: 0,
@@ -291,6 +312,7 @@ describe("LangSmithConnectionForm", () => {
 					workspace_id: "workspace-1",
 					project_name: "support-agent",
 					status: "active",
+					sync_cron: "0 * * * *",
 					last_sync_finished_at: null,
 					last_success_at: null,
 					last_scan_count: 0,
@@ -316,6 +338,7 @@ describe("LangSmithConnectionForm", () => {
 			workspace_id: "workspace-1",
 			project_name: "support-agent",
 			status: "active" as const,
+			sync_cron: "0 * * * *",
 			last_sync_finished_at: null,
 			last_success_at: "2026-07-19T00:00:00Z",
 			last_scan_count: 4,
