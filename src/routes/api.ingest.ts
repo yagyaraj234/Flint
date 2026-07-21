@@ -4,7 +4,11 @@ export const Route = createFileRoute("/api/ingest")({
 	server: {
 		handlers: {
 			POST: async ({ request }) => {
-				const expectedToken = process.env.INGEST_TOKEN;
+				const expectedToken =
+					process.env.INGEST_TOKEN ??
+					(process.env.HELIX_DEMO === "true"
+						? "helix-demo-ingest-token"
+						: undefined);
 				if (!expectedToken) {
 					return Response.json(
 						{ error: "Ingest is not configured." },

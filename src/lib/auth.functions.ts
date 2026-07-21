@@ -41,7 +41,9 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
 			{ redirectTo },
 		);
 		if (error) return { error: error.message, ok: false as const };
-		return { ok: true as const };
+		return process.env.HELIX_DEMO === "true"
+			? { demo: true as const, ok: true as const }
+			: { ok: true as const };
 	});
 
 export const exchangePasswordRecoveryCode = createServerFn({ method: "POST" })

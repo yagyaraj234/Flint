@@ -21,7 +21,9 @@ async function api<T>(
 	userId: string,
 	init: RequestInit = {},
 ): Promise<T> {
-	const token = process.env.INTERNAL_API_TOKEN;
+	const token =
+		process.env.INTERNAL_API_TOKEN ??
+		(process.env.HELIX_DEMO === "true" ? "helix-demo-internal-token" : "");
 	if (!token) throw new Error("Integration service is not configured.");
 	const response = await fetch(`${apiUrl}${path}`, {
 		...init,

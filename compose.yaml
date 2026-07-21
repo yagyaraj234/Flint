@@ -1,7 +1,11 @@
 services:
   api:
     build: ./api
-    env_file: ./api/.env
+    env_file:
+      - path: ./api/.env
+        required: false
+    environment:
+      HELIX_DEMO: ${HELIX_DEMO:-true}
     ports:
       - "8000:8000"
     healthcheck:
@@ -13,9 +17,12 @@ services:
 
   web:
     build: .
-    env_file: ./.env
+    env_file:
+      - path: ./.env
+        required: false
     environment:
       API_URL: http://api:8000
+      HELIX_DEMO: ${HELIX_DEMO:-true}
     ports:
       - "3000:3000"
     depends_on:

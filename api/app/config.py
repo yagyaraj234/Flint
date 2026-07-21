@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, NoDecode
 
 
 class Settings(BaseSettings):
+    helix_demo: bool = False
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     openai_api_key: str = ""

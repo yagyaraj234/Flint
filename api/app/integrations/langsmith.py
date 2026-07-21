@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from urllib.parse import urlparse
+from uuid import uuid4
 
 import httpx
 
@@ -25,6 +26,14 @@ class LangSmithError(RuntimeError):
 class SyncResult:
     scanned: int = 0
     scan_slugs: tuple[str, ...] = ()
+
+
+_DEMO_WORKSPACE = {"id": "demo-workspace", "display_name": "Demo workspace"}
+_DEMO_PROJECT = {"name": "Demo support agent"}
+
+
+def _demo_mode() -> bool:
+    return bool(getattr(get_settings(), "helix_demo", False))
 
 
 def _endpoint(value: str) -> str:
@@ -236,6 +245,8 @@ def list_connections(db: Any, user_id: str) -> list[LangSmithConnectionResponse]
 def validate_connection_scope(
     endpoint: str, api_key: str, workspace_id: str, project_name: str
 ) -> None:
+    if _demo_mode():
+        return
     workspaces = LangSmithClient(endpoint, api_key).list_workspaces()
     if workspace_id not in {str(workspace.get("id")) for workspace in workspaces}:
         raise ValueError("Selected workspace is not available for this key")
@@ -255,7 +266,7 @@ def create_connection(db: Any, user_id: str, data: LangSmithConnectionCreate) ->
         "workspace_id": data.workspace_id.strip(),
         "project_name": data.project_name.strip(),
         "sync_cron": data.sync_cron,
-        "api_key_encrypted": encrypt_credential(data.api_key),
+        "api_key_encrypted": "" if _demo_mode() else encrypt_credential(data.api_key),
         "key_version": 1,
     }
     if not row["label"] or not row["workspace_id"] or not row["project_name"]:
@@ -286,8 +297,10 @@ def update_connection(db: Any, user_id: str, connection_id: str, data: LangSmith
             if not patch[field]:
                 raise ValueError(f"{field} is required")
     if "api_key" in patch:
-        patch["api_key_encrypted"] = encrypt_credential(str(patch.pop("api_key")))
-        patch["key_version"] = 1
+        api_key = str(patch.pop("api_key"))
+        if not _demo_mode():
+            patch["api_key_encrypted"] = encrypt_credential(api_key)
+            patch["key_version"] = 1
     if {"endpoint", "workspace_id", "project_name"} & patch.keys():
         patch.update(
             {
@@ -429,7 +442,58 @@ def _children_by_trace(
         offset += len(page)
 
 
+def _demo_sync(db: Any, connection_id: str) -> SyncResult:
+    connection = _load_connection(db, connection_id)
+    if not connection or connection.get("status") != "active":
+        return SyncResult()
+    trace_id = f"demo-{uuid4()}"
+    slug = run_pipeline(
+        IngestRequest(
+            source="langsmith",
+            format="generic",
+            title=f"{connection['label']} demo trace",
+            trace={
+                "trace_id": trace_id,
+                "workflow": str(connection["project_name"]),
+                "spans": [
+                    {
+                        "id": "draft",
+                        "type": "llm",
+                        "name": "draft response",
+                        "model": "gpt-4o-mini",
+                        "input": "Summarize this support request.",
+                        "output": "Draft response ready.",
+                        "usage": {"input_tokens": 120, "output_tokens": 60},
+                    },
+                    {
+                        "id": "lookup",
+                        "type": "tool",
+                        "name": "get_order",
+                        "args": {"order_id": "DEMO-123"},
+                        "result": {"status": "shipped"},
+                    },
+                ],
+            },
+        ),
+        user_id=str(connection["user_id"]),
+        langsmith_connection_id=connection_id,
+        external_trace_id=trace_id,
+    )
+    now = _now().isoformat()
+    db.table("langsmith_connections").update(
+        {
+            "last_sync_finished_at": now,
+            "last_success_at": now,
+            "last_scan_count": 1,
+            "last_error": None,
+        }
+    ).eq("id", connection_id).execute()
+    return SyncResult(1, (slug,))
+
+
 def sync_connection(db: Any, connection_id: str) -> SyncResult:
+    if _demo_mode():
+        return _demo_sync(db, connection_id)
     now = _now()
     connection = _load_connection(db, connection_id)
     if not connection or connection.get("status") != "active" or not _acquire_lease(db, connection, now):
@@ -521,9 +585,15 @@ class LangSmithConnections:
         self._db = db
 
     def workspaces(self, endpoint: str, api_key: str) -> list[dict[str, Any]]:
+        if _demo_mode():
+            _endpoint(endpoint)
+            return [_DEMO_WORKSPACE]
         return LangSmithClient(endpoint, api_key).list_workspaces()
 
     def projects(self, endpoint: str, api_key: str, workspace_id: str) -> list[dict[str, Any]]:
+        if _demo_mode():
+            _endpoint(endpoint)
+            return [_DEMO_PROJECT]
         return LangSmithClient(endpoint, api_key, workspace_id).list_projects()
 
     def create(self, user_id: str, data: LangSmithConnectionCreate) -> LangSmithConnectionResponse:
@@ -539,7 +609,7 @@ class LangSmithConnections:
         current = get_connection_record(self._db, user_id, connection_id)
         if not current:
             return None
-        if any(value is not None for value in (data.endpoint, data.api_key, data.workspace_id, data.project_name)):
+        if not _demo_mode() and any(value is not None for value in (data.endpoint, data.api_key, data.workspace_id, data.project_name)):
             validate_connection_scope(
                 data.endpoint if data.endpoint is not None else str(current["endpoint"]),
                 data.api_key if data.api_key is not None else decrypt_credential(str(current["api_key_encrypted"])),

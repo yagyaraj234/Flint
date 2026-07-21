@@ -18,6 +18,7 @@ function ResetPasswordPage() {
 	const [formError, setFormError] = useState<string | null>(null);
 	const [pending, setPending] = useState(false);
 	const [sent, setSent] = useState(false);
+	const [demo, setDemo] = useState(false);
 
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -33,6 +34,7 @@ function ResetPasswordPage() {
 				setFormError(result.error);
 				return;
 			}
+			setDemo("demo" in result && result.demo);
 			setSent(true);
 		} catch {
 			setFormError("Could not send reset email. Try again.");
@@ -45,8 +47,19 @@ function ResetPasswordPage() {
 		return (
 			<AuthShell title="Check your email">
 				<p className="mb-6 text-sm text-muted">
-					Use the link we sent to choose a new password.
+					{demo
+						? "Demo mode does not send email. Continue with the local reset flow."
+						: "Use the link we sent to choose a new password."}
 				</p>
+				{demo ? (
+					<Link
+						className="mb-4 block text-accent"
+						to="/update-password"
+						search={{ code: "demo" }}
+					>
+						Continue to password reset
+					</Link>
+				) : null}
 				<Link className="text-accent" to="/login">
 					Back to login
 				</Link>

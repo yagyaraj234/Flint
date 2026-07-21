@@ -19,6 +19,11 @@ FastAPI owns assessment, Supabase, billing, LangSmith sync, and secrets.
 TanStack Start owns the UI and server-side calls to FastAPI. The browser uses
 Supabase only for authentication and never accesses the `roasts` table.
 
+`HELIX_DEMO=true` swaps Supabase, Dodo, LangSmith, and OpenAI for local,
+generic behavior. It is for evaluation only: sign-in accepts any valid email
+and 8+ character password, data resets when the API restarts, no email is sent,
+and no payment or provider request is made.
+
 Supported secrets are redacted before raw or normalized trace data is stored.
 PII findings are detection-only today; emails and phone numbers are not redacted.
 Public report APIs exclude raw traces, owner data, batches, errors, and all
@@ -26,29 +31,39 @@ LangSmith-sourced reports.
 
 ## Run with Docker
 
-Requires Docker Desktop (or Docker Engine with Compose). Helix uses your
-Supabase project; Compose starts the app services, not a replacement database.
-Before the first run, apply [`api/schema.sql`](api/schema.sql) to that Supabase
-project.
+Requires Docker Desktop (or Docker Engine with Compose). The default command
+runs the complete no-key demo; no account, database, API key, or `.env` file is
+needed.
 
 ```bash
-cp .env.example .env
-cp api/.env.example api/.env
-# Set Supabase values in both files.
-# For LangSmith, set the same INTERNAL_API_TOKEN in both files.
-# Keep service-role, OpenAI, Dodo, cron, and LangSmith API-key values in api/.env.
 docker compose up --build
 ```
 
 Open `http://localhost:3000`. FastAPI health check: `http://localhost:8000/health`.
-Stop with `docker compose down`; start later with `docker compose up`.
+Sign up with any valid email and an 8+ character password, then upload a JSON
+trace. The LangSmith form accepts any nonempty key and returns generic workspace
+and project data; its **Scan now** action creates a generic local trace. Billing
+uses a no-charge local checkout. Stop with `docker compose down`; starting again
+resets demo data.
+
+Verify the API demo after it is up:
+
+```bash
+docker compose exec api python scripts/verify_demo.py
+```
+
+### Real providers
+
+Set `HELIX_DEMO=false`, copy both example environment files, and configure the
+real provider values. Apply [`api/schema.sql`](api/schema.sql) to Supabase before
+starting production-like services. Keep service-role, OpenAI, Dodo, cron, and
+LangSmith credentials in `api/.env`; the Start server needs the matching
+Supabase URL/publishable key and `INTERNAL_API_TOKEN` in `.env`.
 
 ## Run without Docker
 
-Copy `api/.env.example` to `api/.env` and configure the backend values. The
-Start server also needs `API_URL`, `SUPABASE_URL`, and either
-`SUPABASE_PUBLISHABLE_KEY` or `SUPABASE_ANON_KEY`; `INTERNAL_API_TOKEN` is
-needed when using LangSmith connections.
+Copy the example files to run locally. They default to no-key demo mode. Set
+`HELIX_DEMO=false` and configure providers only when testing real integrations.
 
 ```bash
 # terminal 1

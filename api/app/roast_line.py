@@ -87,7 +87,7 @@ def generate_luna_assessment(
 ) -> tuple[str, DetailedReport] | None:
     """Generate a structured report from redacted metadata. None means fallback."""
     settings = get_settings()
-    if not settings.openai_api_key:
+    if getattr(settings, "helix_demo", False) or not settings.openai_api_key:
         return None
     try:
         client = OpenAI(api_key=settings.openai_api_key)

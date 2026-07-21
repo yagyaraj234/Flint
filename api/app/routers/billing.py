@@ -99,6 +99,19 @@ def _monthly_scan_count(db: Any, user_id: str) -> int:
 def checkout(user_id: str = Depends(required_user_id)) -> CheckoutResponse:
     settings = get_settings()
     db = get_supabase()
+    if getattr(settings, "helix_demo", False):
+        db.table("subscriptions").upsert(
+            {
+                "user_id": user_id,
+                "plan": PRO_PLAN,
+                "status": "active",
+                "dodo_customer_id": "demo",
+                "current_period_end": None,
+                "updated_at": datetime.now(UTC).isoformat(),
+            },
+            on_conflict="user_id",
+        ).execute()
+        return CheckoutResponse(checkout_url="/app/billing")
     try:
         checkout_url = create_checkout_session(
             user_id,
@@ -117,6 +130,13 @@ def billing_status(user_id: str = Depends(required_user_id)) -> BillingStatusRes
     settings = get_settings()
     db = get_supabase()
     subscription = _subscription(db, user_id)
+    if getattr(settings, "helix_demo", False) and subscription and subscription.get("plan") == PRO_PLAN:
+        return BillingStatusResponse(
+            plan=PRO_PLAN,
+            status="active",
+            credits_remaining=9999,
+            current_period_end=None,
+        )
     if subscription and subscription.get("plan") == PRO_PLAN:
         customer_id = subscription.get("dodo_customer_id")
         if not isinstance(customer_id, str) or not customer_id:

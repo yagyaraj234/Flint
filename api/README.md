@@ -3,6 +3,10 @@
 FastAPI backend for Helix. It owns trace assessment, redacted persistence,
 Supabase auth validation, report sharing, Dodo billing, and LangSmith sync.
 
+With `HELIX_DEMO=true`, it uses an in-memory store and generic provider
+responses instead. No network credentials are required; data resets when the
+API process restarts.
+
 ## Run without Docker
 
 Requires Python 3.11+.
@@ -15,11 +19,12 @@ cp .env.example .env
 ./.venv/bin/python -m uvicorn app.main:app --reload --port 8000
 ```
 
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are required for database-backed
-routes. `OPENAI_API_KEY` is optional: without it, the deterministic fallback
-roast line and detailed report are persisted. Configure Dodo values only for
-checkout/metering, and LangSmith/cron values only for connections and scheduled
-sync. Never place frontend Supabase keys in this file.
+The copied example runs locally in demo mode. Set `HELIX_DEMO=false` to require
+real providers: `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are then required
+for database-backed routes. `OPENAI_API_KEY` remains optional; without it, the
+deterministic fallback roast line and detailed report are persisted. Configure
+Dodo values only for checkout/metering, and LangSmith/cron values only for
+connections and scheduled sync. Never place frontend Supabase keys in this file.
 
 ## Endpoint groups
 

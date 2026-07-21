@@ -50,6 +50,8 @@ def scan_entitlement(
 ) -> ScanEntitlement:
     """Return entitlement or reject a whole batch before any Scan starts."""
 
+    if getattr(get_settings(), "helix_demo", False):
+        return ScanEntitlement(PRO_PLAN, None, 0, None)
     subscription = _subscription(db, user_id)
     if subscription.get("plan") == PRO_PLAN:
         customer_id = subscription.get("dodo_customer_id")
